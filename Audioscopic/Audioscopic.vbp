@@ -1,0 +1,45 @@
+Type=Exe
+Object={0E59F1D2-1FBE-11D0-8FF2-00A0D10038BC}#1.0#0; msscript.ocx
+Object={F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0; comdlg32.ocx
+Form=frmMain.frm
+UserControl=WaveView.ctl
+Module=modAudio; modAudio.bas
+Module=modColor; modColor.bas
+IconForm="frmMain"
+Startup="frmMain"
+HelpFile=""
+Title="Audioscopic"
+ExeName32="Audioscopic.exe"
+Command32=""
+Name="Audioscopic"
+HelpContextID="0"
+CompatibleMode="0"
+MajorVer=1
+MinorVer=0
+RevisionVer=0
+AutoIncrementVer=0
+ServerSupportFiles=0
+VersionComments="The wave base viewer analyzer I began when I wanted to try to arthroscopic target in any 3D location of sound from legacy audio recordings isolating and extrapolating it, like as if pixel rendered arthroscopic only for audio."
+VersionCompanyName="Computer Science"
+CondComp="Audioscopic=-1:VBIDE=-1:modHook=-1:modDeclares=-1:modAudio=-1:modWave=-1:modMain=-1:modColor=-1"
+CompilationType=0
+OptimizationType=0
+FavorPentiumPro(tm)=0
+CodeViewDebugInfo=0
+NoAliasing=0
+BoundsCheck=0
+OverflowCheck=0
+FlPointCheck=0
+FDIVCheck=0
+UnroundedFP=0
+StartMode=0
+Unattended=0
+Retained=0
+ThreadPerObject=0
+MaxNumberOfThreads=1
+
+[MS Transaction Server]
+AutoRefresh=1
+
+[Neotext]
+CompCond="modAudio=-1:modColor=-1"
