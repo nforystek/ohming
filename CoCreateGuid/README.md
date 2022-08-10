@@ -1,0 +1,1 @@
+There was a lot of samples of uses of CoCreateGUID out there, but when you debug.print in a loop the created GUIDs scrolling by fast, often reveal repeat patterns, this is no just to the name GLobally Uniquie ID itself, in my opinion, so I worked at getting the debug.print rate to show no sign of sections of the GUID repeating and accomplished it with this source.
