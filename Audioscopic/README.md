@@ -1,0 +1,1 @@
+I started this because I thought there maybe a way to extract 3D location listening from any recording after the fact, sort of like anthroscopic in pixels, but for audio.  But I still don't know what the heck I'm seeing in WAVE data format put to visual or cohearant explination. So I just made it look cool as a WAVE audio viewer instead.
