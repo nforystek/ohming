@@ -1,0 +1,45 @@
+Type=Exe
+Object={648A5603-2C6E-101B-82B6-000000000014}#1.1#0; mscomm32.ocx
+Form=Window.frm
+Module=modMWHook; modMWHook.bas
+Module=modCommon; modCommon.bas
+IconForm="Window"
+Startup="Window"
+HelpFile=""
+Title="Console"
+ExeName32="Console.exe"
+Command32=""
+Name="Console"
+HelpContextID="0"
+Description="Arduino Serial Port Console"
+CompatibleMode="0"
+MajorVer=1
+MinorVer=0
+RevisionVer=0
+AutoIncrementVer=0
+ServerSupportFiles=0
+VersionCompanyName="Nicholas Forystek"
+VersionProductName="Arduino Console (Drone Version)"
+CondComp="Console=-1:VBIDE=-1:modCommon=-1:modMWHook=-1"
+CompilationType=0
+OptimizationType=0
+FavorPentiumPro(tm)=0
+CodeViewDebugInfo=0
+NoAliasing=0
+BoundsCheck=0
+OverflowCheck=0
+FlPointCheck=0
+FDIVCheck=0
+UnroundedFP=0
+StartMode=0
+Unattended=0
+Retained=0
+ThreadPerObject=0
+MaxNumberOfThreads=3
+DebugStartupOption=0
+
+[MS Transaction Server]
+AutoRefresh=1
+
+[Neotext]
+CompCond="modMWHook=-1:modCommon=-1"
