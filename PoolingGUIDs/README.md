@@ -1,1 +1,0 @@
-This code generates ID's that wont repeat in a pool, a pool being the active running scope of memory, so if the program shuts down and starts back up they have a potential of repeating.  They are fashioned similar to GUIDs.
