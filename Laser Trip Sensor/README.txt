@@ -36,6 +36,7 @@ https://www.amazon.com/gp/product/B00GNIKFLW/ref=ppx_yo_dt_b_search_asin_image?i
 There are two different mount 3D prints, one for the mirror and one for a laster & photoresistor pair,
 you'll need two screws, two nuts, and two washers for each mount (a local hardware store like True Value,
 or Ace Hardware has nuts, bolts and washers, you'll just have to work with fitting them correct sizes).
+I also use a little bit of Polymorph modling plastic to encase & shield the laser & photoresistor pair.
 
 Pictures of the mounts can be found in "Arduino Workshop\Security System," however they're fitted to the
 four wire per trip design, that this folder outlines aim to make each trip only two wires per trip and

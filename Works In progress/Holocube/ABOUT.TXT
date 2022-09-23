@@ -1,0 +1,11 @@
+
+The idea behind this project is to get a red, a green and a blue laser and clock them using invisible
+red LED pair along with the bouncing of reflective LED pair to achieve a single pixel in a glass cube.
+
+
+How I see it is the invisible red emitter and receiver will travel the over all transmission time, and
+because it's triggered by red laser light some then can be used as a voice around and outside of a red
+laser, for the green and blue, as well, the green be a line type of laser, then the rate in hertz of
+flickering RGS against each other with intensities, is how the blue gets around voice to the all will
+when opaque in glass, cause reflective LED pairs to bounce off, or a somehow smoky glass only on light
+that can reflect, I've still only setup a laser and invisible red, and reflective like in the project.

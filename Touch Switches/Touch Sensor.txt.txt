@@ -1,0 +1,10 @@
+These transistors linked here make a very simply option for touch sensor, if you don't want to use direct to the Arduinio.
+
+https://www.amazon.com/gp/product/B083TF4K6L/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
+
+  You may also find youtube.com videos that show an example by searching on the transistor part:
+
+https://www.youtube.com/watch?time_continue=9&v=0YYmy2ErMhs&feature=emb_title
+
+I included a screenshot from everycircuit.com of a simple door bell that can be rigged with the 2N7000 transistor
+for a touch sensor and a Pezio buzzer to actaully make noise as the circuit has only needed 5v relay in exampled.
