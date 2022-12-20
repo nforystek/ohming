@@ -4,53 +4,55 @@ Begin VB.Form Window
    AutoRedraw      =   -1  'True
    BorderStyle     =   1  'Fixed Single
    Caption         =   "Arduino Console"
-   ClientHeight    =   5130
+   ClientHeight    =   7995
    ClientLeft      =   45
    ClientTop       =   330
-   ClientWidth     =   8160
+   ClientWidth     =   9930
    ClipControls    =   0   'False
    Icon            =   "Window.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   5130
-   ScaleWidth      =   8160
+   ScaleHeight     =   533
+   ScaleMode       =   3  'Pixel
+   ScaleWidth      =   662
    StartUpPosition =   2  'CenterScreen
    Begin VB.PictureBox Picture1 
-      Height          =   3480
-      Left            =   2985
-      ScaleHeight     =   3420
-      ScaleWidth      =   4905
-      TabIndex        =   18
-      Top             =   1410
-      Width           =   4965
+      Height          =   7200
+      Left            =   150
+      ScaleHeight     =   476
+      ScaleMode       =   3  'Pixel
+      ScaleWidth      =   636
+      TabIndex        =   2
+      Top             =   630
+      Width           =   9600
    End
    Begin VB.CommandButton ConnectButton 
       Caption         =   "Open"
       Height          =   345
-      Left            =   1215
+      Left            =   1350
       TabIndex        =   1
-      Top             =   990
+      Top             =   105
       Width           =   705
    End
    Begin VB.ComboBox CommPort 
       Height          =   315
       ItemData        =   "Window.frx":0442
-      Left            =   105
+      Left            =   240
       List            =   "Window.frx":0476
       Style           =   2  'Dropdown List
       TabIndex        =   0
-      Top             =   1005
+      Top             =   120
       Width           =   1050
    End
    Begin VB.Timer MainLoop 
       Interval        =   1
-      Left            =   1830
-      Top             =   870
+      Left            =   2370
+      Top             =   105
    End
    Begin MSCommLib.MSComm Arduino 
-      Left            =   2295
-      Top             =   840
+      Left            =   3120
+      Top             =   30
       _ExtentX        =   1005
       _ExtentY        =   1005
       _Version        =   393216
@@ -60,166 +62,6 @@ Begin VB.Form Window
       BaudRate        =   115200
       InputMode       =   1
    End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   15
-      Left            =   0
-      TabIndex        =   17
-      Top             =   720
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   14
-      Left            =   735
-      TabIndex        =   16
-      Top             =   720
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   13
-      Left            =   1470
-      TabIndex        =   15
-      Top             =   720
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   12
-      Left            =   2205
-      TabIndex        =   14
-      Top             =   720
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   11
-      Left            =   0
-      TabIndex        =   13
-      Top             =   480
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   10
-      Left            =   735
-      TabIndex        =   12
-      Top             =   480
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   9
-      Left            =   1470
-      TabIndex        =   11
-      Top             =   480
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   8
-      Left            =   2205
-      TabIndex        =   10
-      Top             =   480
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   7
-      Left            =   0
-      TabIndex        =   9
-      Top             =   240
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   6
-      Left            =   735
-      TabIndex        =   8
-      Top             =   240
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   5
-      Left            =   1470
-      TabIndex        =   7
-      Top             =   240
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   4
-      Left            =   2205
-      TabIndex        =   6
-      Top             =   240
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   3
-      Left            =   2205
-      TabIndex        =   5
-      Top             =   0
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   2
-      Left            =   1470
-      TabIndex        =   4
-      Top             =   0
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   1
-      Left            =   735
-      TabIndex        =   3
-      Top             =   0
-      Width           =   735
-   End
-   Begin VB.Label Label1 
-      Alignment       =   2  'Center
-      Caption         =   "Label1"
-      Height          =   240
-      Index           =   0
-      Left            =   0
-      TabIndex        =   2
-      Top             =   0
-      Width           =   735
-   End
 End
 Attribute VB_Name = "Window"
 Attribute VB_GlobalNameSpace = False
@@ -227,6 +69,8 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+Private Const pixelWidth As Long = 20
+Private Const pixelHeight As Long = 20
 
 Private Sub Form_Load()
     CommPort.ListIndex = 5
@@ -269,10 +113,9 @@ Private Function PortOpen() As Boolean
     End If
     If Not Arduino.PortOpen Then
         Arduino.CommPort = 6
-        Arduino.Settings = "115200,N,8,1"
-        Arduino.InputLen = 16
-        Arduino.InBufferSize = 16
-        Arduino.OutBufferSize = 16
+        Arduino.Settings = "256000,N,8,1"
+        Arduino.InputLen = pixelHeight * pixelWidth
+        Arduino.InBufferSize = pixelHeight * pixelWidth
         Arduino.PortOpen = True
     End If
     
@@ -295,15 +138,36 @@ End Sub
 
 Public Sub ProcessSerial()
     If Arduino.PortOpen Then
-        If Arduino.InBufferCount >= 16 Then
+        If Arduino.InBufferCount >= pixelHeight * pixelWidth Then
+        
             Dim inc() As Byte
             Dim tmp As Variant
             tmp = Arduino.Input
             inc = tmp
-            Dim i As Long
+            Dim x As Integer
+            Dim y As Integer
+            Dim x1 As Long
+            Dim y1 As Long
+            
+            Dim i As Integer
             For i = LBound(inc) To UBound(inc)
-                Label1(i).Caption = inc(i)
+            
+                x1 = x * (Picture1.Width / pixelHeight)
+                y1 = y * (Picture1.Height / pixelHeight)
+                
+                Picture1.Line (x1, y1)-(x1 + (Picture1.Width / pixelHeight), y1 + (Picture1.Height / pixelHeight)), RGB(inc(i), inc(i), inc(i)), BF
+
+                x = x + 1
+                If x = pixelWidth Then
+                    x = 0
+                    y = y + 1
+                    If y = pixelHeight Then
+                        y = 0
+                    End If
+                End If
+                
             Next
+
             Arduino.InBufferCount = 0
         End If
     End If
