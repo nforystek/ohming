@@ -62,6 +62,13 @@ Begin VB.Form Window
       BaudRate        =   115200
       InputMode       =   1
    End
+   Begin VB.Label Label1 
+      Height          =   255
+      Left            =   4170
+      TabIndex        =   3
+      Top             =   165
+      Width           =   1770
+   End
 End
 Attribute VB_Name = "Window"
 Attribute VB_GlobalNameSpace = False
@@ -71,11 +78,29 @@ Attribute VB_Exposed = False
 Option Explicit
 Private Const pixelWidth As Long = 20
 Private Const pixelHeight As Long = 20
+Private Elapsed As Single
+Private BytesRead As Single
+
 
 Private Sub Form_Load()
     CommPort.ListIndex = 5
     ConnectButton_Click
+    Debug.Print delayValue(11, 20)
+    
 End Sub
+
+Public Function delayValue(axis As Integer, bound As Integer) As Single
+  Dim half As Single
+  half = (CSng(bound) / 2)
+  Dim faxis As Single
+  faxis = CSng(axis)
+  If (faxis < half) Then
+    delayValue = ((((-faxis - half) + CSng(bound)) / half) * CSng(bound))
+  ElseIf (faxis > half) Then
+    delayValue = (((faxis - half) / half) * CSng(bound))
+  End If
+End Function
+
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
     PortClose
@@ -114,8 +139,8 @@ Private Function PortOpen() As Boolean
     If Not Arduino.PortOpen Then
         Arduino.CommPort = 6
         Arduino.Settings = "256000,N,8,1"
-        Arduino.InputLen = pixelHeight * pixelWidth
-        Arduino.InBufferSize = pixelHeight * pixelWidth
+        Arduino.InputLen = (pixelHeight * pixelWidth)
+        Arduino.InBufferSize = (pixelHeight * pixelWidth)
         Arduino.PortOpen = True
     End If
     
@@ -139,11 +164,13 @@ End Sub
 Public Sub ProcessSerial()
     If Arduino.PortOpen Then
         If Arduino.InBufferCount >= pixelHeight * pixelWidth Then
-        
+
             Dim inc() As Byte
             Dim tmp As Variant
             tmp = Arduino.Input
             inc = tmp
+            BytesRead = BytesRead + (pixelHeight * pixelWidth)
+            
             Dim x As Integer
             Dim y As Integer
             Dim x1 As Long
@@ -167,7 +194,13 @@ Public Sub ProcessSerial()
                 End If
                 
             Next
-
+            
+            If Elapsed = 0 Or (Timer - Elapsed) >= 1 Then
+                Elapsed = Timer
+                Label1.Caption = BytesRead & " bytes/sec"
+                BytesRead = 0
+            End If
+            
             Arduino.InBufferCount = 0
         End If
     End If
