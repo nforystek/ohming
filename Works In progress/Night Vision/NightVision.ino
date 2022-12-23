@@ -1,6 +1,16 @@
-byte writes[8] = {5, 6, 7, 8, 9, 10, 11, 12 };
-byte reader[4] = {A0, A1, A2, A3 };
+byte writes[8] = {6, 7, 8, 9, 10, 11, 12, 13 };
+byte reader[4] = {A0, A2, A3, A4 };
 
+#define Delay_In_Microseconds true
+
+#define Use_Delay_During_Emitter true
+#define Delay_During_Emitter 8
+
+#define Use_Delay_Between_Emitters false
+#define Delay_Between_Emitters 8
+
+#define Use_Delay_Radius_Multiplier true
+#define Delay_Radius_Multiplier 8
 
 /*
  *   LED Setup
@@ -8,129 +18,133 @@ byte reader[4] = {A0, A1, A2, A3 };
  *   @=receiver/reader
  *   O=emitter/writes
  * 
- *     O O        0 1
- *   O @ @ O    7 0 1 2
- *   O @ @ O    6 3 2 3
- *     O O        5 4
+ *             Indexed      Pin Out
+ *     O O       0 1         06 07
+ *   O @ @ O   7 0 1 2    13 A0 A1 08
+ *   O @ @ O   6 3 2 3    12 A3 A2 09
+ *     O O       5 4         11 10
  */
 
-
-
-int width=20;
-int height=20;
-
-byte pixel[20][20];
+byte data[4*23];
 
 void setup() {
 
-  for (int i=0;i<8; i++) {
+  for (int i=0;i<18; i++) {
     pinMode(writes[i], OUTPUT);
-    digitalWrite(writes[i], HIGH);
+    digitalWrite(writes[i], LOW);
   }
-  for (int x=0;x<width; x++) {
-    for (int y=0;y<height; y++) {
-      pixel[x][y]=0;
-    }
+  for (int i=0;i<4*23; i++) {
+    data[i]=0;
   }
   Serial.begin(256000);  
 }
 
-float delayValue(int axis, int bound, bool leftorright) {
-  float half = (((float)bound)/2);
-  float faxis=((float)axis);
-  if (faxis<half) {
-    if (leftorright) {
-      return ((((((-faxis-half)+((float)bound))/half)*((float)bound)))*10);
-    } else {
-      return 0;
-    }
-  } else if (faxis>half) {
-     if (!leftorright) {
-      return (((((faxis-half) / half)*((float)bound)))*10);
-     } else {
-      return 0;
-     }
-  }
+void do_Delay_During_Emitter() {
+#ifdef Use_Delay_During_Emitter
+  #ifdef Delay_In_Microseconds
+    delayMicroseconds(Delay_During_Emitter);
+  #else
+    delay(Delay_During_Emitter);
+  #endif
+#endif
 }
 
-void GatherSet(int x, int y) {
+void do_Delay_Between_Emitters() {
+#ifdef Use_Delay_Between_Emitters
+  #ifdef Delay_In_Microseconds
+    delayMicroseconds(Delay_Between_Emitters);
+  #else
+    delay(Delay_Between_Emitters);
+  #endif
+#endif
+}
+void do_Delay_Radius_Multiplier(int i) {
+#ifdef Use_Delay_Radius_Multiplier
+  #ifdef Delay_In_Microseconds
+     delayMicroseconds((i+1)*Delay_Radius_Multiplier);
+  #else
+    delay((i+1)*Delay_Radius_Multiplier); 
+  #endif
+#else
+  #ifdef Use_Delay_During_Emitter
+    #ifdef Delay_In_Microseconds
+      delayMicroseconds((i+1)*Delay_During_Emitter);
+    #else
+      delay((i+1)*Delay_During_Emitter);
+    #endif
+  #else
+    #ifdef Delay_In_Microseconds
+       delayMicroseconds((i+1));
+    #else
+      delay((i+1)); 
+    #endif
+  #endif
+#endif
+}
+byte analogByteRead(int pin) {
+    return (255*((float)(((float)analogRead(pin))/1024)));
+}
 
-  float reads[4];  
+void GatherSet(int c) {
+  //c=cycle or set around the circle, 1 to 4 directions
+  //for each set we gather the following information:
 
-  digitalWrite(writes[7], LOW);
-  digitalWrite(writes[6], LOW);
+  //an emitter and reader pair next to each other
+  //along the same lines as the current direction
+  //this acts as the intregal expiriment direction 
+  digitalWrite(writes[(c*2)], HIGH);  
+  do_Delay_During_Emitter();
+  data[c*23]=analogByteRead(reader[c]);
+  digitalWrite(writes[(c*2)], LOW);
+  do_Delay_Between_Emitters();
 
-  delayMicroseconds(delayValue(x,width,true));
-  
-  reads[0] = (((float)(analogRead(reader[3])+analogRead(reader[0])))/2);
+  //the same reader with a emitter diagnal to it
+  //or the next emitter forth clockwise like a set
+  //this will act as a folcum in ratios controlled
+  digitalWrite(writes[(c*2)+1], HIGH);  
+  do_Delay_During_Emitter();
+  data[c*23+1]=analogByteRead(reader[c]);
+  digitalWrite(writes[(c*2)+1], LOW);
+  do_Delay_Between_Emitters();
 
-  digitalWrite(writes[7], HIGH);
-  digitalWrite(writes[6], HIGH);
+  //according to the prior diagnal, also gather
+  //the same signals of it's pair to the next reader
+  //along the same lines as the current direction
+  //this will act as the factor to direction tests
+  digitalWrite(writes[(c*2)+1], HIGH);  
+  do_Delay_During_Emitter();
+  data[c*23+2]=analogByteRead(reader[c+1]);
+  digitalWrite(writes[(c*2)+1], LOW);
+  do_Delay_Between_Emitters();
 
-  digitalWrite(writes[3], LOW);
-  digitalWrite(writes[2], LOW);
-  
-  delayMicroseconds(delayValue(x,width,false));
-  
-  reads[1] = (((float)(analogRead(reader[1])+analogRead(reader[2])))/2);
-  
-  digitalWrite(writes[3], HIGH);
-  digitalWrite(writes[2], HIGH); 
- 
-  digitalWrite(writes[0], LOW);
-  digitalWrite(writes[1], LOW);
-
-  
-  delayMicroseconds(delayValue(y,height,true));
-  
-  reads[2] = (((float)(analogRead(reader[0])+analogRead(reader[1])))/2);
-
-
-  digitalWrite(writes[0], HIGH);
-  digitalWrite(writes[1], HIGH);
- 
-  digitalWrite(writes[4], LOW);
-  digitalWrite(writes[5], LOW);
-  
-  delayMicroseconds(delayValue(y,height,false));
-  
-  reads[3] = (((float)(analogRead(reader[2])+analogRead(reader[3])))/2);
-
-
-  digitalWrite(writes[4], HIGH);
-  digitalWrite(writes[5], HIGH);
-
-  pixel[x][y]=((byte)((reads[0]+reads[1]+reads[2]+reads[3])/4));
+  //using the first emitter left on, and the second
+  //pulsing, read from the second reader used above
+  //for the duration of 20 repititions as our radius
+  //these will act as texts to the ratio directions
+  digitalWrite(writes[(c*2)], HIGH);
+  for (int i = 0; i<20;i++) {
+    digitalWrite(writes[(c*2)+1], HIGH);    
+    do_Delay_Radius_Multiplier(i);
+    data[c*23+3+i]=analogByteRead(reader[c+1]);
+    digitalWrite(writes[(c*2)+1], LOW);    
+    do_Delay_Between_Emitters();
+  }  
+  digitalWrite(writes[(c*2)], LOW);  
 
 }
 
 void loop() {
 
-  byte hi=0;
-  byte lo=255;
-  float avg=0;
-  for (int x=0;x<width; x++) {
-    for (int y=0;y<height; y++) {
-      GatherSet(x,y);
-      if (pixel[x][y]>hi) hi = pixel[x][y];
-      if (pixel[x][y]<lo) lo = pixel[x][y];
-      avg+=pixel[x][y];
-    }
-  }
-  avg = (avg / ((float)(width*height)));
-  for (int x=0;x<width; x++) {
-    for (int y=0;y<height; y++) {
-      if (pixel[x][y]>avg) {
-        pixel[x][y] +=(byte)(((((float)hi)-pixel[x][y])/256)*((float)(256-pixel[x][y])));
-      } else if (pixel[x][y]<avg) {
-        pixel[x][y] -=(byte)(((pixel[x][y]-((float)lo))/256)*((float)pixel[x][y]));
-      }
-    }
-  }
+  GatherSet(0);
 
+  GatherSet(1);
+
+  GatherSet(2);
+
+  GatherSet(3);
+  
   if (Serial) {
-
-    Serial.write(*pixel, width*height);
-    
+    Serial.write(data, 4*23);
   }
+  
 }

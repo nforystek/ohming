@@ -4,28 +4,37 @@ Begin VB.Form Window
    AutoRedraw      =   -1  'True
    BorderStyle     =   1  'Fixed Single
    Caption         =   "Arduino Console"
-   ClientHeight    =   7995
+   ClientHeight    =   9015
    ClientLeft      =   45
    ClientTop       =   330
-   ClientWidth     =   9930
+   ClientWidth     =   14310
    ClipControls    =   0   'False
    Icon            =   "Window.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   533
+   ScaleHeight     =   601
    ScaleMode       =   3  'Pixel
-   ScaleWidth      =   662
+   ScaleWidth      =   954
    StartUpPosition =   2  'CenterScreen
    Begin VB.PictureBox Picture1 
-      Height          =   7200
+      BeginProperty Font 
+         Name            =   "Lucida Console"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   7770
       Left            =   150
-      ScaleHeight     =   476
+      ScaleHeight     =   514
       ScaleMode       =   3  'Pixel
-      ScaleWidth      =   636
+      ScaleWidth      =   925
       TabIndex        =   2
       Top             =   630
-      Width           =   9600
+      Width           =   13935
    End
    Begin VB.CommandButton ConnectButton 
       Caption         =   "Open"
@@ -47,12 +56,12 @@ Begin VB.Form Window
    End
    Begin VB.Timer MainLoop 
       Interval        =   1
-      Left            =   2370
-      Top             =   105
+      Left            =   4515
+      Top             =   75
    End
    Begin MSCommLib.MSComm Arduino 
-      Left            =   3120
-      Top             =   30
+      Left            =   5550
+      Top             =   45
       _ExtentX        =   1005
       _ExtentY        =   1005
       _Version        =   393216
@@ -63,11 +72,12 @@ Begin VB.Form Window
       InputMode       =   1
    End
    Begin VB.Label Label1 
+      Alignment       =   2  'Center
       Height          =   255
-      Left            =   4170
+      Left            =   2085
       TabIndex        =   3
       Top             =   165
-      Width           =   1770
+      Width           =   1875
    End
 End
 Attribute VB_Name = "Window"
@@ -76,30 +86,21 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-Private Const pixelWidth As Long = 20
-Private Const pixelHeight As Long = 20
+Private Const packetSize As Long = (4 * 23)
+Private Const pixelHeight = 20
+Private Const pixelWidth = 20
+
 Private Elapsed As Single
 Private BytesRead As Single
+
+Private Declare Sub RtlMoveMemory Lib "kernel32" (Dest As Any, ByVal Source As Long, ByVal Size As Long)
+
 
 
 Private Sub Form_Load()
     CommPort.ListIndex = 5
     ConnectButton_Click
-    Debug.Print delayValue(11, 20)
-    
 End Sub
-
-Public Function delayValue(axis As Integer, bound As Integer) As Single
-  Dim half As Single
-  half = (CSng(bound) / 2)
-  Dim faxis As Single
-  faxis = CSng(axis)
-  If (faxis < half) Then
-    delayValue = ((((-faxis - half) + CSng(bound)) / half) * CSng(bound))
-  ElseIf (faxis > half) Then
-    delayValue = (((faxis - half) / half) * CSng(bound))
-  End If
-End Function
 
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
@@ -137,10 +138,10 @@ Private Function PortOpen() As Boolean
         Arduino.PortOpen = False
     End If
     If Not Arduino.PortOpen Then
-        Arduino.CommPort = 6
+        Arduino.CommPort = (CommPort.ListIndex + 1)
         Arduino.Settings = "256000,N,8,1"
-        Arduino.InputLen = (pixelHeight * pixelWidth)
-        Arduino.InBufferSize = (pixelHeight * pixelWidth)
+        Arduino.InputLen = packetSize
+        Arduino.InBufferSize = packetSize
         Arduino.PortOpen = True
     End If
     
@@ -163,37 +164,52 @@ End Sub
 
 Public Sub ProcessSerial()
     If Arduino.PortOpen Then
-        If Arduino.InBufferCount >= pixelHeight * pixelWidth Then
+        If Arduino.InBufferCount >= packetSize Then
 
             Dim inc() As Byte
+            
             Dim tmp As Variant
             tmp = Arduino.Input
             inc = tmp
-            BytesRead = BytesRead + (pixelHeight * pixelWidth)
+            BytesRead = BytesRead + packetSize
             
             Dim x As Integer
             Dim y As Integer
             Dim x1 As Long
             Dim y1 As Long
             
-            Dim i As Integer
-            For i = LBound(inc) To UBound(inc)
             
-                x1 = x * (Picture1.Width / pixelHeight)
-                y1 = y * (Picture1.Height / pixelHeight)
-                
-                Picture1.Line (x1, y1)-(x1 + (Picture1.Width / pixelHeight), y1 + (Picture1.Height / pixelHeight)), RGB(inc(i), inc(i), inc(i)), BF
+            
+            Dim i As Integer
+            Dim debugtxt As String
+            
+            For i = LBound(inc) To UBound(inc)
 
-                x = x + 1
-                If x = pixelWidth Then
-                    x = 0
-                    y = y + 1
-                    If y = pixelHeight Then
-                        y = 0
-                    End If
-                End If
-                
+                debugtxt = debugtxt & IIf(Len(CStr(inc(i))) < 3, String(3 - Len(CStr(inc(i))), " ") & inc(i), inc(i)) & " "
+                If (i + 1) Mod 23 = 0 Then debugtxt = debugtxt & vbCrLf
             Next
+            Picture1.Cls
+            
+            Picture1.Print debugtxt
+            
+            
+'            For i = LBound(inc) To UBound(inc)
+'
+'                x1 = x * (Picture1.Width / pixelHeight)
+'                y1 = y * (Picture1.Height / pixelHeight)
+'
+'                Picture1.Line (x1, y1)-(x1 + (Picture1.Width / pixelHeight), y1 + (Picture1.Height / pixelHeight)), RGB(inc(i), inc(i), inc(i)), BF
+'
+'                x = x + 1
+'                If x = pixelWidth Then
+'                    x = 0
+'                    y = y + 1
+'                    If y = pixelHeight Then
+'                        y = 0
+'                    End If
+'                End If
+'
+'            Next
             
             If Elapsed = 0 Or (Timer - Elapsed) >= 1 Then
                 Elapsed = Timer
