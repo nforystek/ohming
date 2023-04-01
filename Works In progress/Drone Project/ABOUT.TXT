@@ -3,14 +3,14 @@
                ABOUT:
 #########################################
 
-Initially I called this project YAADD, "Yet Another Arduino Dumb Drone,"  I haven't seen a first so "another" is misleading, but I assume with all those out there, largely drone and Arduino markets may somehow depend on each other.  This is my Drone Project folder that I will update as a work in progress of SketchUp models for 3D printing, wiring diagrams, and software code for both sketches and the ESP8299 Basic langauge.
+Initially I called this project YAADD, "Yet Another Arduino Dumb Drone,"  I haven't seen a first so "another" is misleading, but I assume with all those out there, largely drone and Arduino markets may somehow depend on each other.  This is my Drone Project folder that I will update as a work in progress of SketchUp models for 3D printing, wiring diagrams, and software code for both sketches and the ESP8299.
 
 
 #########################################
                PRODUCT:
 #########################################
 
-Apart from the files, or software, everything else is purchasable via Amazon.com where I myself acquire anything referenced in making project. 3D filament, an inexpensive 3D printer, Arduino's, or modules/hardware that interfaces to an Arduino are all 100% purchased through Amazon.com and quite cheap I believe for end user, but I'm not sure where else to get such electronics.
+Apart from the files, or software, everything else is purchasable via Amazon.com and Aliexpress.com (for the power boost module) where I myself acquire anything referenced in making project. Aside from the one module to boost powewr, the 3D filament, an inexpensive 3D printer, Arduino's, or modules/hardware that interfaces to an Arduino are all purchased through Amazon.com and quite cheap I believe for end user.  Most the stuff is also available at aliexpress.com I imagine, and cheaper, but their shipping is from Asia 100% and it is slow as a month at best, or not at all sometimes. I had a package from China take six months one time.  Certian cases there is no tracking from aliexpress.com, so if you like the USA shipping speedy, youj'll pay the amaxzon.com prices I'm sure, I havne't found the power module specifically on amazon.com but it appears there are a ton.  This one is maybe an exception for it's claims so many come up on amazon for the terms to search I can't result they have it or not (inputs a 3.7v lithium rechargable battery to output boost to 12v0.8A or 9v1a DC).  Oh, also I found a vendor on aliexpress.com that actually sells all the motors you could need for this particular similarity of project motor, utmost important is they are pictured together with sizes of shafts and diameters so you know what your gettings, as that is a PROBLEM on amazon.com, they just show a pciture of what every one of them could pose as in scale the camera shot.  I bought four way too small from amazon.com, and they were loud like there was rusting inside.  I don't know, aliexpress.com also had the drone balls (pictured in the folder) so cheap and so nice of a decent size motor, plus you'll get a IR pair and lithium battery harvesting the components.  Do not use the lithium batter on this project with out the protection circuit that is shown in the picture of the batteries.  This project will ignite the lithium battery like a smoke bomb for the way they are wired, they need that protection circuit.
 
 
 #########################################
@@ -18,7 +18,7 @@ Apart from the files, or software, everything else is purchasable via Amazon.com
 #########################################
 
 
-I am not making a functional camera, but there will be four available onboard PWM pins left or 8 binary on/off’s depending on how it pans out, and the weight of the unit currently is nearing half the weight of a very cheap 30$ one I got on Amazon that does have a camera.
+I am not making a functional camera, but there will be four available onboard PWM pins left or 8 binary on/off’s depending on how it pans out, and the weight of the unit currently is under the weight of a very cheap 30$ one I got on Amazon that does have a camera, but it doesn't seem to have a MTU or GPS.
 
 I am going with a separate hand held unit not a phone or computer as the controls, as to make it just a neat toy that hopefully flies comprised of the two pieces, a drone and controller, and charges with a computer or charger chord.  The controller will be a small similarity to that of Sega Genesis built up with InstaMorph plastic.
 
@@ -28,7 +28,7 @@ I am going with a separate hand held unit not a phone or computer as the control
 #########################################
 
 
-I’ve only recently got operating with all connected elements and modules of both the drone and a remote control on breadboards. The next part of the process is thoroughly documenting in diagram so I can recreate it no questions in a permanent unit, with out ordering a whole set of extra parts to built one along side, and so I made this folder to share with the public.
+So, I'm waiting on a boost module and a 74HC595 chip like the 8 bit register that comes with Arduino Uno starter kits.  After much diliberation I still believe, with a 2n2222 amp transsitor and something else of a transistor it's possible it could have got up with out a boost, and hot transistors, but not likely at my test budget.  I did see in whiteboard the proper setup preforming the motors in overdrive but by time I could implement it I was low on parts and I got the wrong 2n2222 transistor, rather there are two others, a p2n2222 and a 2n222a so I've put up a new diagram I shouldn't have to probably fret, but I haven't received the power booster yet.  In otherwords it's not but only flipped itself once, before I have flyuing code developed, it hasn't been enough to take off to really take this project out of the "Words in Progress" folder.  But the controls are decently handling performance so those ESP8266 source codes I consider finished.  Plugging in the drone, and then plugging in the controller, they sync and the blue light fires rapidly telling me it's receiving the messages, everything is responsive.  For more information on how to get the ESP8266 working well with the Arduino IDE I've created a ESP8266 sub folder.
 
 
 #########################################
@@ -48,3 +48,4 @@ To the quest, there are so many thousands of these things it seems you can find 
 https://www.amazon.com/
 https://www.arduino.cc/
 http://www.esp8266basic.com/
+http://www.aliexpress.com/
