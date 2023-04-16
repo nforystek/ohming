@@ -1,0 +1,3 @@
+## Ignore some custom files and/or directories
+*.skp
+*.skb
