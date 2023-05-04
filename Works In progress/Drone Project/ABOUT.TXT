@@ -3,14 +3,14 @@
                ABOUT:
 #########################################
 
-Initially I called this project YAADD, "Yet Another Arduino Dumb Drone,"  I haven't seen a first so "another" is misleading, but I assume with all those out there, largely drone and Arduino markets may somehow depend on each other.  This is my Drone Project folder that I will update as a work in progress of SketchUp models for 3D printing, wiring diagrams, and software code for both sketches and the ESP8299.
+Initially I called this project YAADD, "Yet Another Arduino Dumb Drone,"  I haven't seen a first so "another" is misleading, but I assume with all those out there, largely drone and Arduino markets may somehow depend on each other.  This is my Drone Project folder that I will update as a work in progress of SketchUp models for 3D printing, wiring diagrams, and software code for both sketches and the ESP8266.
 
 
 #########################################
                PRODUCT:
 #########################################
 
-Apart from the files, or software, everything else is purchasable via Amazon.com and Aliexpress.com (for the power boost module) where I myself acquire anything referenced in making project. Aside from the one module to boost powewr, the 3D filament, an inexpensive 3D printer, Arduino's, or modules/hardware that interfaces to an Arduino are all purchased through Amazon.com and quite cheap I believe for end user.  Most the stuff is also available at aliexpress.com I imagine, and cheaper, but their shipping is from Asia 100% and it is slow as a month at best, or not at all sometimes. I had a package from China take six months one time.  Certian cases there is no tracking from aliexpress.com, so if you like the USA shipping speedy, youj'll pay the amaxzon.com prices I'm sure, I havne't found the power module specifically on amazon.com but it appears there are a ton.  This one is maybe an exception for it's claims so many come up on amazon for the terms to search I can't result they have it or not (inputs a 3.7v lithium rechargable battery to output boost to 12v0.8A or 9v1a DC).  Oh, also I found a vendor on aliexpress.com that actually sells all the motors you could need for this particular similarity of project motor, utmost important is they are pictured together with sizes of shafts and diameters so you know what your gettings, as that is a PROBLEM on amazon.com, they just show a pciture of what every one of them could pose as in scale the camera shot.  I bought four way too small from amazon.com, and they were loud like there was rusting inside.  I don't know, aliexpress.com also had the drone balls (pictured in the folder) so cheap and so nice of a decent size motor, plus you'll get a IR pair and lithium battery harvesting the components.  Do not use the lithium batter on this project with out the protection circuit that is shown in the picture of the batteries.  This project will ignite the lithium battery like a smoke bomb for the way they are wired, they need that protection circuit.
+Apart from the files, or software, everything else is purchasable via Amazon.com and Aliexpress.com (for the power boost module, also I found the batteries cheaper at Aliexpress, 10 to 2 same price) where I myself acquire anything referenced in making project. Aside from the one module to boost powewr, the 3D filament, an inexpensive 3D printer, Arduino's, or modules/hardware that interfaces to an Arduino are all purchasable through Amazon.com and quite cheap I believe for end user.  I tried searching for the power boost module at Amazon and no luck in finding it via serch terms Amazon messes up with way too much incorrect suggestive product in term to results, so it might not have it or Amazon is incapable of the option of strict regular expression for my query thoughts.
 
 
 #########################################
@@ -18,18 +18,22 @@ Apart from the files, or software, everything else is purchasable via Amazon.com
 #########################################
 
 
-I am not making a functional camera, but there will be four available onboard PWM pins left or 8 binary on/off’s depending on how it pans out, and the weight of the unit currently is under the weight of a very cheap 30$ one I got on Amazon that does have a camera, but it doesn't seem to have a MTU or GPS.
+I am not making a functional camera, there is only 4 lights as far as anything extra special, however, it has a gyro chip, and GPS so possibly it could do some cool stuff with those in flying stable preset tracks, or follow some phone like your own pet.
 
-I am going with a separate hand held unit not a phone or computer as the controls, as to make it just a neat toy that hopefully flies comprised of the two pieces, a drone and controller, and charges with a computer or charger chord.  The controller will be a small similarity to that of Sega Genesis built up with InstaMorph plastic.
-
+I am going with a separate hand held unit not a phone or computer as the controls, as to make it just a neat toy that hopefully flies comprised of the two pieces, a drone and controller, and it charges batteries by USB to computer. The controller already is a solid small similarity to that of Sega Genesis built up with InstaMorph plastic.  Also I'm making a Visual Basic application that will emulate the controller too.
 
 #########################################
                PROGRESS:
 #########################################
 
 
-So, I'm waiting on a boost module and a 74HC595 chip like the 8 bit register that comes with Arduino Uno starter kits.  After much diliberation I still believe, with a 2n2222 amp transsitor and something else of a transistor it's possible it could have got up with out a boost, and hot transistors, but not likely at my test budget.  I did see in whiteboard the proper setup preforming the motors in overdrive but by time I could implement it I was low on parts and I got the wrong 2n2222 transistor, rather there are two others, a p2n2222 and a 2n222a so I've put up a new diagram I shouldn't have to probably fret, but I haven't received the power booster yet.  In otherwords it's not but only flipped itself once, before I have flyuing code developed, it hasn't been enough to take off to really take this project out of the "Words in Progress" folder.  But the controls are decently handling performance so those ESP8266 source codes I consider finished.  Plugging in the drone, and then plugging in the controller, they sync and the blue light fires rapidly telling me it's receiving the messages, everything is responsive.  For more information on how to get the ESP8266 working well with the Arduino IDE I've created a ESP8266 sub folder.
+In need of new batteries, and I'm going with two LP 502030, 3.7v 250mAh, as well small JST plugs for a bit different way I'm making the battery cage plug in, instead of wire lengths on the JST to do so, they are getting too worked and failing at the terminals.  So, I'm fixing the plugs to the battery cage as if a cartridge.
 
+Yet so far in early testing, I think the diagram is finished, I've not tested it on the drone itself, but mimmiced it on a white board and I think I have the motor/transistor combo that will give enough power and trim to do the job, with only 9v all be it wall power, it deifnitly displays enough motor speed, so the 12v boost shouldn't have a problem unless over powering, which I doubt for it actually coming off a 3.7v LIPO battery.
+
+The controls are decently handling performance so those ESP8266 source codes I consider finished.  Plugging in the drone, and then plugging in the controller, they sync and the blue light fires rapidly telling me it's receiving the messages, everything is responsive.  For more information on how to get the ESP8266 working well with the Arduino IDE I've created a ESP8266 sub folder.
+
+I also found the code so far to be botched in MPU-5060 programing, I figured it out but haven't updated it because I've had to overhaul the whole engine ways of doing things, and until I get a testable pwoerful enough actual functioning drone, I wont be able to help any of that portion of development yet.
 
 #########################################
                OUTLOOK:
