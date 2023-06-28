@@ -4,24 +4,23 @@
  
 //Comment out NOUSB to preserve resource when
 //operating, no serial debug will be outputted
-#define NOUSB
+//#define NOUSB
 
 //Comment out NOESP to have serial input and
 //output conole control connected to the USB.
-//#define NOESP
+#define NOESP
 
 //Comment out NO74H to ignore the 74H chip
 //absent auxiliary logics in operating mode
 //#define NO74H
 
 //Comment out no GPS to disable
-//the Neo-GPS location chip
-//#define NOGPS
+//the Neo-GPS location chip                                                                                     
+#define NOGPS
 
-//Comment ou no MTU to disable the
+//Comment ou no MPU to disable the
 //pitch/yaw/tilt motion sensor chip
-
-//#define NOMTU
+//#define NOMPU
 
 //Comment out NOPWM to disable the use of
 //the four capable analogWrite digitals
@@ -34,51 +33,63 @@
 //The following DEBUG are visual serial console
 //and only present when NOESP is defined also.
 //#define DEBUGGPS
-//#define DEBUGMTU
+//#define DEBUGMPU
 
 //The following DEBUG puts all 10 logics into
 //a systems wiring check mode pulsing outputs
+
 //#define DEBUG74H
 
 //Uncomment for debugging the analogWrite PWM
 //#define DEBUGPWM
 
-
-/******************
- *   PIN defines  *
- ******************/
+//Uncomment for debugging the controller buttons.
+//#define DEBUGESP
 
 //LED on board
 #define LED_BLINK_PIN 13
- 
-//GPS RX/TX
-#define GPS_SERIAL_RX_PIN 8
-#define GPS_SERIAL_TX_PIN 7
+
+//Rate and Timer 
+#define UNIFIED_BAUD_RATE 115200
+#define BALANCE_INTERVAL 1000
+#define NETWORK_INTERVAL 100
+#define NETWORK_YEILDING 50
 
 //ESP8266 IO0 and IO2 pins
 #define ESP_SERIAL_RX_PIN 1
 #define ESP_SERIAL_TX_PIN 0
 #define ESP_CHIP_EN_PIN 9
 
-//PIN constants for PWM
+//GPS RX/TX
+#define GPS_SERIAL_RX_PIN 8
+#define GPS_SERIAL_TX_PIN 7
+
+//74H constants
+#define LED_CLOCK_PIN 4
+#define LED_LATCH_PIN 11
+#define LED_SHIFT_PIN 12
+
+#define MAX_74H_PULSE 250                                                                                                                //in milliseconds
+#define MIN_74H_PULSE 10 //in milliseconds
+
+#define PULSE_CHANGE_RATE 10 //in milliseconds
+
+//Interrupt Pin for the MPU
+#define MPU_INTR_PIN 2
+
+//PWM constants 
 #define PWM_MOTOR1_PIN 10
 #define PWM_MOTOR2_PIN 5
 #define PWM_MOTOR3_PIN 6
 #define PWM_MOTOR4_PIN 3
 
-//PIN constants for 74H ICS
-#define LED_CLOCK_PIN 4
-#define LED_LATCH_PIN 11
-#define LED_SHIFT_PIN 12
+#define PWM_MIN_SPEED 15 //slowest taxi state
+#define PWM_MAX_SPEED 255 //byte maximum
 
-//Interrupt Pin for the MTU
-#define MTU_INTR_PIN 2
+#define PWM_CHANGE_RATE 5
 
-/********************************
- *   Includes and initializers  *
- ********************************/
 
-#ifndef NOMTU
+#ifndef NOMPU
 #include <Wire.h>
 #endif
 
@@ -97,106 +108,47 @@ SoftwareSerial Serial2(GPS_SERIAL_RX_PIN, GPS_SERIAL_TX_PIN);
 TinyGPS gps;
 #endif
 
-/********************************
- *   Program operation defines  *
- ********************************/
-
-#define UNIFIED_BAUD_RATE 115200
-
-#define PWM_MIN_SPEED 15
-#define PWM_MAX_SPEED 255
-
-#define BALANCE_INTERVAL 1000
-
-#define NETWORK_INTERVAL 100
-#define NETWORK_YEILDING 50
-
-/*****************
- *   Structures  *
- *****************/
- 
-struct utility {
-  //74H program properties
-  bool enable;
-  long elapse;
-  long latency;
-};
-
-/**************
- *   Globals  *
- **************/
- 
-float actualX, actualY, actualZ;
-float offsetX, offsetY, offsetZ;
-float pickupX, pickupY, pickupZ;
-float medianX, medianY, medianZ;
-float targetX, targetY, targetZ;
-float virtueX, virtueY, virtueZ;
-
-long AxisX=0, AxisY=0, AxisZ=0;
-bool Switch=false, Depress=false;
-
-unsigned long elapseTarget;
-unsigned long networkLatent;
-unsigned long networkElapse;
-
-float flat, flon;
-unsigned long age;
-
-int avgcnt=0;
-                  
+#ifndef NOPWM
 float motor1=0;
 float motor2=0;
 float motor3=0;
 float motor4=0;
-struct utility m[8];
-unsigned char utilityRegister = 0;
 
-static char incoming[255];
+bool poweredUp = false;
 
-static bool powersOn=false;
-
-
-/*****************************
- *   Non specific functions  *
- *****************************/
-
-#ifndef NOUSB
-
-String Padding(int Len, String Val) {
-  String ret="";
-  if ((Len-Val.length())>0)     
-    for (int i = 0 ; i < (Len-Val.length()); i++)  ret.concat(' ');
-  ret.concat(Val);
-  return ret;
-}
 #endif
 
-byte IncreaseMotor(byte motor, byte inc) {
-  if (((byte)motor+inc)<=255) 
-    return ((byte)motor+inc);
-  else
-    return 255;
-}
-byte DecreaseMotor(byte motor, byte dec) {
-  if (motor-dec>=0)
-    return motor=motor-dec;
-  else
-    return 0; 
-}
+#ifndef NO74H
+struct utility {
+  //74H program properties
+  bool enable; //whether the 74H port is enabled
+  long elapse; //running time to a toggle enable
+  long latency; //amount between enable toggling
+};
 
-byte* ChangeMotor(byte motor, byte inc) {
-  if ((((int)motor+(int)inc)<=255)&&(((int)motor+(int)inc)>=0))
-    return (byte)((int)motor)+((int)inc);
-  else if ((((int)motor)+((int)inc))>=255)
-    return 255;
-  else 
-    return 0;
-}
+struct utility m[8];
+unsigned char utilityRegister = 0;
+#endif
 
-bool Range(float val1, float val2) {
-  return ((val1>=val2-0.01)&&(val1<=val2+0.01));
-}
+#ifndef NOMPU
+float rotateX, rotateY, rotateZ;  //current values of the MPU rotation axis
+float accelX, accelY, accelZ;  //current values of the MPU accellerator axis
+float tempC; ///current temperature of the MPU, doesn't appear to be C or F
+float offset1, offset2, offset3, offset4, offset5, offset6; //beginning values
+#define setSize 4
+float mpuChange[setSize*6]; /* horizontal change
+stablizing similar to running averaging but discards the info as a actual value.
+-0.01 and +0.01 are vertical variant and -/+0.03 Hori. or Vert. is a difference */
+#endif
+
+#ifndef NOGPS
+float flat, flon;
+unsigned long age;
+#endif
+
+long AxisX=0, AxisY=0, AxisZ=0;
+bool Switch=false, Depress=false;
+
 
 String RemoveNextArg(String *args, String delim) {
   String ret=String(*args);
@@ -260,12 +212,11 @@ long Convert(int len, char num[]) {
   return ret;
 }
 
-/*****************************
- *   74h specific functions  *
- *****************************/
- 
 #ifndef NO74H
 
+/******************
+ *   74H Private  *
+ ******************/
 
 void UpdateShiftRegister()
 {
@@ -279,6 +230,9 @@ void UpdateShiftRegister()
 }
 
 void Governer() {
+  //a periodic function that advances the states of
+  //the 74H eight ports based on the latency toggles
+  //individually set by other 74H functions below
   bool ison;
   for (int i = 0; i<8;i++) {
     m[i].elapse--;
@@ -302,42 +256,16 @@ void Governer() {
   }
 }
 
-void Setup74H() {
-
-  pinMode(LED_LATCH_PIN, OUTPUT);
-  pinMode(LED_CLOCK_PIN, OUTPUT);  
-  pinMode(LED_SHIFT_PIN, OUTPUT); 
-  
-  for (int i=0;i<8;i++) {
-    m[i].enable=false;
-    m[i].elapse=0;
-    m[i].latency=0;
-  }
-    
-  bitClear(utilityRegister,0);
-  bitClear(utilityRegister,1);
-  bitClear(utilityRegister,2);
-  bitClear(utilityRegister,3);
-  bitClear(utilityRegister,4);
-  bitClear(utilityRegister,5);
-  bitClear(utilityRegister,6);
-  bitClear(utilityRegister,7);
-
-  digitalWrite(LED_LATCH_PIN, LOW);
-  shiftOut(LED_SHIFT_PIN, LED_CLOCK_PIN, LSBFIRST, utilityRegister);
-  digitalWrite(LED_LATCH_PIN, HIGH);
-}
-
-
 void EnableDisable(bool IsEnable, int num) {
   for (int i = 0 ; i<8; i ++) {  
     m[i].enable = (((i==num)||(num==-1))?IsEnable:m[i].enable);  
-    if (!m[i].enable)
-      bitClear(utilityRegister,i);
-    else
-      bitSet(utilityRegister,i);   
+    if (!m[i].enable) {
+      bitClear(utilityRegister,i);      
+    }  else {
+      bitSet(utilityRegister,i);
+    }
     UpdateShiftRegister();
-  }
+  }  
 }
 
 void IncreaseDecrease(bool IsIncrease, int num, long val) {
@@ -353,14 +281,15 @@ void IncreaseDecrease(bool IsIncrease, int num, long val) {
       if (newVal!=m[i].latency)
       {
         if (newVal>=0) {
-         m[i].elapse=(m[i].elapse-(m[i].latency-newVal));
+          m[i].elapse=(m[i].elapse-(m[i].latency-newVal));
           m[i].latency=newVal;            
         }
       }
     }
     if (m[i].elapse==0) m[i].elapse=m[i].latency;
-  } 
+  }
 }
+
 void RatePulseInterval( int num, long val) {
   long newVal;
   for (int i = 0 ; i<8; i ++) {
@@ -369,277 +298,180 @@ void RatePulseInterval( int num, long val) {
     {
       m[i].elapse=-m[i].elapse;
       m[i].latency=newVal;            
-    }
-    Governer();
+    } 
   } 
+  Governer();
 }
 
-void ZeroPower() {
-  for (int i=0;i<8;i++) EnableDisable(false,i);
-//  motor1=0;
-//  motor2=0;
-//  motor3=0;
-//  motor4=0;
-//  digitalWrite(PWM_MOTOR1_PIN,LOW);
-//  digitalWrite(PWM_MOTOR2_PIN,LOW);
-//  digitalWrite(PWM_MOTOR3_PIN,LOW);
-//  digitalWrite(PWM_MOTOR4_PIN,LOW);
-}
-
-void FullPower() {
-  for (int i=0;i<8;i++) EnableDisable(true,i);
-//  motor1=255;
-//  motor2=255;
-//  motor3=255;        
-//  motor4=255;
-//  digitalWrite(PWM_MOTOR1_PIN,HIGH);
-//  digitalWrite(PWM_MOTOR2_PIN,HIGH);
-//  digitalWrite(PWM_MOTOR3_PIN,HIGH);
-//  digitalWrite(PWM_MOTOR4_PIN,HIGH);
-}
-
-void OddPower() {
-  for (int i=0;i<8;i++) EnableDisable(((i % 2)==1),i);
-}
-
-void EvenPower() {
-  for (int i=0;i<8;i++) EnableDisable(((i % 2)==0),i);
+/*****************
+ *   74H Public  *
+ *****************/
+void LightIndicator(bool OnOff) {
+  if (OnOff) {
+    if (motor1!=0) EnableDisable(true,0);
+    if (motor2!=0) EnableDisable(true,1);
+    if (motor3!=0) EnableDisable(true,2);
+    if (motor4!=0) EnableDisable(true,3);
+  } else {
+    if (motor1==0) EnableDisable(false,0);
+    if (motor2==0) EnableDisable(false,1);
+    if (motor3==0) EnableDisable(false,2);
+    if (motor4==0) EnableDisable(false,3);
+  }
 }
 
 void IncreasePulse() {
   for (int i =0;i<8;i++) {
-     if (m[i].latency>1) IncreaseDecrease(true,i,50);  
+     if (m[i].latency>(MIN_74H_PULSE+PULSE_CHANGE_RATE)) IncreaseDecrease(true,i,PULSE_CHANGE_RATE);  
   }
 }
 
 void DecreasePulse() {
   for (int i =0;i<8;i++) {
-    if (m[i].latency<1001) IncreaseDecrease(false,i,50);
+    if (m[i].latency<(MAX_74H_PULSE-PULSE_CHANGE_RATE)) IncreaseDecrease(false,i,PULSE_CHANGE_RATE);
   }
 }
 
-void  AlternatePower() {
-  static bool first=!(m[0].elapse<1);
-  for (int i =0;i<8;i++) {  
-    if (first>0) 
-      m[i].elapse=-abs(m[i].elapse);
-    else
-      m[i].elapse=abs(m[i].elapse);
-    first=!first;
-  }    
-}
+//void OddPower() {
+//  for (int i=0;i<8;i++) {
+//    EnableDisable(((i % 2)==1),i);
+//  }
+//}
+//
+//void EvenPower() {
+//  for (int i =0;i<8;i++) {  
+//    EnableDisable(((i % 2)==0),i);
+//  }
+//}
+//void  AlternatePower() {
+//  static bool first=!(m[0].elapse<1);
+//  for (int i =0;i<8;i++) {  
+//    if (first>0) 
+//      m[i].elapse=-abs(m[i].elapse);
+//    else
+//      m[i].elapse=abs(m[i].elapse);
+//    first=!first;
+//  }
+//}
+//
+//void RegulatedPower() {
+//  for (int i =0;i<8;i++) {
+//    m[i].elapse=0;
+//  }
+//}
 
-void RegulatedPower() {
-  for (int i =0;i<8;i++) m[i].elapse=0;
-}
+void Setup74H() {
 
-void QuarterTrimsPower() {
-  motor1=64;
-  motor2=64;
-  motor3=64;
-  motor4=64;
-  digitalWrite(PWM_MOTOR1_PIN,HIGH);
-  digitalWrite(PWM_MOTOR2_PIN,HIGH);
-  digitalWrite(PWM_MOTOR3_PIN,HIGH);
-  digitalWrite(PWM_MOTOR4_PIN,HIGH); 
-}
+  pinMode(LED_LATCH_PIN, OUTPUT);
+  pinMode(LED_CLOCK_PIN, OUTPUT);  
+  pinMode(LED_SHIFT_PIN, OUTPUT); 
+  
+  for (int i=0;i<8;i++) {
+    m[i].enable=false;
+    m[i].elapse=1;
+    m[i].latency=1;
+  }
 
-void HalfTrimsPower() {
-  motor1=128;
-  motor2=128;
-  motor3=128;        
-  motor4=128;
-  digitalWrite(PWM_MOTOR1_PIN,HIGH);
-  digitalWrite(PWM_MOTOR2_PIN,HIGH);
-  digitalWrite(PWM_MOTOR3_PIN,HIGH);
-  digitalWrite(PWM_MOTOR4_PIN,HIGH);
+  utilityRegister=0;
+  digitalWrite(LED_LATCH_PIN, LOW);
+  shiftOut(LED_SHIFT_PIN, LED_CLOCK_PIN, LSBFIRST, utilityRegister);
+  digitalWrite(LED_LATCH_PIN, HIGH);
 }
 
 #endif
 
 /*****************************
- *   MTU specific functions  *
+ *   MPU specific functions  *
  *****************************/
- 
+#ifndef NOMPU 
 #ifndef NOUSB
-#ifdef DEBUGMTU
-void DebugMTU()
+#ifdef DEBUGMPU
+void DebugMPU()
 {
-    Serial.print("Offset: ");
-    Serial.print(Padding(6, String(offsetX)));
-    Serial.print(Padding(6, String(offsetY)));
-    Serial.print(Padding(6, String(offsetZ)));
-    Serial.print("  Actual: ");
-    Serial.print(Padding(6, String(actualX)));
-    Serial.print(Padding(6, String(actualY)));
-    Serial.print(Padding(6, String(actualZ)));
-    Serial.print("  Virtue: ");
-    Serial.print(Padding(6, String(virtueX)));
-    Serial.print(Padding(6, String(virtueY)));
-    Serial.print(Padding(6, String(virtueZ)));
-    Serial.print("  Target: ");
-    Serial.print(Padding(6, String(targetX)));
-    Serial.print(Padding(6, String(targetY)));
-    Serial.print(Padding(6, String(targetZ))); 
-    Serial.print("  Pickup: ");
-    Serial.print(Padding(6, String(pickupX)));
-    Serial.print(Padding(6, String(pickupY)));
-    Serial.print(Padding(6, String(pickupZ)));
-    Serial.print("  Median: ");
-    Serial.print(Padding(6, String(medianX)));
-    Serial.print(Padding(6, String(medianY)));
-    Serial.print(Padding(6, String(medianZ)));
+
+    Serial.print("  Accel: ");
+    Serial.print(Padding(6, String(accelX)));
+    Serial.print(Padding(6, String(accelY)));
+    Serial.print(Padding(6, String(accelZ)));
+    Serial.print("  Rotate: ");
+    Serial.print(Padding(7, String(rotateX)));
+    Serial.print(Padding(7, String(rotateY)));
+    Serial.print(Padding(7, String(rotateZ)));
+    Serial.print("  Temperature: ");
+    Serial.print(Padding(6, String(tempC)));
+    
 }
 #endif
 #endif
 
-#ifndef NOMTU  
-void Accellerator1() {
-
-  digitalWrite(MTU_INTR_PIN, LOW);
+void Gyroscope1() {  /* this function is split into two parts because the
+  elapsed timing is too long and the unit needs to be quickly responsive */
+  digitalWrite(MPU_INTR_PIN, LOW);
   // === Read acceleromter data === //
   Wire.beginTransmission(0x68);
   Wire.write(0x3B); // Start with register 0x3B (ACCEL_XOUT_H)
   Wire.endTransmission(false);
-  digitalWrite(MTU_INTR_PIN,HIGH);
+  digitalWrite(MPU_INTR_PIN,HIGH);
 }
 
-void Accellerator2() {
-
-  digitalWrite(MTU_INTR_PIN, LOW);
-  Wire.requestFrom(0x68, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
+void Gyroscope2() {  /* this function is split into two parts because the
+  elapsed timing is too long and the unit needs to be quickly responsive */
+  digitalWrite(MPU_INTR_PIN, LOW);
+  Wire.requestFrom(0x68,14, true); // Read 6 registers total, each axis value is stored in 2 registers
   //For a range of +-2g, we need to divide the raw values by 16384, according to the datasheet
-  actualX = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offsetX); // X-axis value
-  actualY = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offsetY); // Y-axis value
-  actualZ = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offsetZ); // Z-axis value
-  digitalWrite(MTU_INTR_PIN,HIGH);
 
+  rotateX = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset1); // X-axis value
+  rotateY = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset2); // Y-axis value
+  rotateZ = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset3); // Z-axis value
+  tempC = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); // gets the raw temperature
+  accelX = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset4); // X-axis value
+  accelY = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset5); // Y-axis value
+  accelZ = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset6); // Z-axis value
+
+
+  digitalWrite(MPU_INTR_PIN,HIGH);
 }
-void Accellerator3() {
-
-  pickupX = (targetX-actualX);
-  pickupY = (targetY-actualY);
-  pickupZ = (targetZ-actualZ);
-
-  medianX=(medianX+actualX);
-  medianY=(medianY+actualY);
-  medianZ=(medianZ+actualZ);
-  if (avgcnt<=10) {
-    avgcnt=avgcnt+1;
-    if (avgcnt==10) {
-      medianX=(medianX/10);
-      medianY=(medianY/10);
-      medianZ=(medianZ/10);
+float GyroChange(int set, float val) {
+  set = set * setSize;
+  float avg=0;
+  if (setSize>1) {
+    for (int i = 0; i<(setSize-1); i++) {
+      avg=avg+mpuChange[set+i];
+      mpuChange[set+i]=mpuChange[set+(i+1)];
     }
-  }
-  if (avgcnt==11) {
-      medianX=(medianX/2);
-      medianY=(medianY/2);
-      medianZ=(medianZ/2);
-  }
-
-  virtueX=((((-(actualX-medianX))+pickupX)+(targetX-pickupX))/2);
-  virtueY=((((-(actualY-medianY))+pickupY)+(targetY-pickupY))/2);
-  virtueZ=((((-(actualZ-medianZ))+pickupZ)+(targetZ-pickupZ))/2);  
-
-  float checkX=targetX-actualX;
-  float checkY=targetY-actualY;
-  float checkZ=targetZ-actualZ;  
-
-  if ((millis()-elapseTarget)>BALANCE_INTERVAL) {
-    elapseTarget=millis();
-
-    if ((targetX!=0)&&(targetX/4!=0)) 
-      targetX=targetX-(targetX/4);
-    else
-      targetX=0;
-
-    if ((targetY!=0)&&(targetY/4!=0)) 
-      targetY=targetY-(targetY/4);
-    else
-      targetY=0;
-
-    if ((targetZ!=0)&&(targetZ/4!=0)) 
-      targetZ=targetZ-(targetZ/4);
-    else
-      targetZ=0;
-  }
-
-  if ((pickupZ!=0)&&(checkZ!=0)) {
-    motor1+=((float)pickupZ);
-    motor2+=((float)pickupZ);
-    motor3+=((float)pickupZ);
-    motor4+=((float)pickupZ);
-  }
-
-  if ((virtueX!=0)&&(checkX!=0)) {
-    motor1+=(((float)virtueX)/2);
-    motor2+=(((float)virtueX)/2);
-    motor3-=(((float)virtueX)/2);
-    motor4-=(((float)virtueX)/2);
-  }
-
-  if ((virtueY!=0)&&(checkY!=0)) {
-    motor1+=(((float)virtueY)/2);
-    motor4+=(((float)virtueY)/2);
-    motor2-=(((float)virtueY)/2);
-    motor3-=(((float)virtueY)/2);
-  }
-
-  if (motor1>PWM_MAX_SPEED)
-    motor1=PWM_MAX_SPEED; 
-  else if (motor1<0)
-    motor1=0;
-
-  if (motor2>PWM_MAX_SPEED)
-    motor2=PWM_MAX_SPEED;
-  else if (motor2<0)
-    motor2=0;
-
-  if (motor3>PWM_MAX_SPEED)
-    motor3=PWM_MAX_SPEED;
-  else if (motor3<0)
-    motor3=0;
-
-  if (motor4>PWM_MAX_SPEED)
-    motor4=PWM_MAX_SPEED;
-  else if (motor4<0)
-    motor4=0;
-
-  Accellerator();
+    avg =(avg/setSize);
+    mpuChange[set+(setSize-1)]=val;
+  } else avg=val;
+   return avg;   
 }
 
-#endif
+void Gyroscope3() { /* used during routine looping in-place of part 2 above */
 
-static void Accellerator() {
-  
-  motor1 = map(AxisZ, 0, 1024, 0, 255);
-  motor2 = map(AxisZ, 0, 1024, 0, 255);
-  motor3 = map(AxisZ, 0, 1024, 0, 255);
-  motor4 = map(AxisZ, 0, 1024, 0, 255);
-  
-  if (motor1==0)
-    digitalWrite(PWM_MOTOR1_PIN,LOW);
-  else
-    analogWrite(PWM_MOTOR1_PIN,motor1);
-  if (motor2==0)
-    digitalWrite(PWM_MOTOR2_PIN,LOW);
-  else
-    analogWrite(PWM_MOTOR2_PIN,motor2);
-  if (motor3==0)
-    digitalWrite(PWM_MOTOR3_PIN,LOW);
-  else
-    analogWrite(PWM_MOTOR3_PIN,motor3);
-  if (motor4==0)
-    digitalWrite(PWM_MOTOR4_PIN,LOW);
-  else
-    analogWrite(PWM_MOTOR4_PIN,motor4);
+  Gyroscope2();
+
+  Gyroscope4();
+
+  rotateX = GyroChange(0, rotateX);
+  rotateY = GyroChange(1, rotateY);
+  rotateZ = GyroChange(2, rotateZ);
+
+  accelX = GyroChange(3, accelX);
+  accelY = GyroChange(4, accelY);
+  accelZ = GyroChange(5, accelZ); 
 }
 
-#ifndef NOMTU  
-void SetupMTU() {
-  pinMode(MTU_INTR_PIN,OUTPUT); 
-  digitalWrite(MTU_INTR_PIN,LOW);  
+void Gyroscope4() {
+  mpuChange[0]=rotateX; mpuChange[1]=rotateX; mpuChange[2]=rotateX;
+  mpuChange[3]=rotateY; mpuChange[4]=rotateY; mpuChange[5]=rotateY;
+  mpuChange[6]=rotateZ; mpuChange[7]=rotateZ; mpuChange[8]=rotateZ;
+  mpuChange[9]=accelX; mpuChange[10]=accelX; mpuChange[11]=accelX;
+  mpuChange[12]=accelY; mpuChange[13]=accelY; mpuChange[14]=accelY;
+  mpuChange[15]=accelZ; mpuChange[16]=accelZ; mpuChange[17]=accelZ;   
+}
+
+void SetupMPU() {
+  pinMode(MPU_INTR_PIN,OUTPUT); 
+  digitalWrite(MPU_INTR_PIN,LOW);  
   
   Wire.begin();                      // Initialize comunication
   Wire.beginTransmission(0x68);       // Start communication with MPU6050 // MPU=0x68
@@ -649,66 +481,36 @@ void SetupMTU() {
   Wire.beginTransmission(0x68);
   Wire.write(0x3B); // Start with register 0x3B (ACCEL_XOUT_H)
   Wire.endTransmission(false);
-  Wire.requestFrom(0x68, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
+  Wire.requestFrom(0x68, 14, true); // Read 14 registers total, each axis value is stored in 2 registers
   //Starting with offset, contrary to the example IDK how it will turn out
-  offsetX = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); // X-axis value
-  offsetY = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); // Y-axis value
-  offsetZ = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); // Z-axis value
+  offset1 = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); // X-axis value
+  offset2 = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); // Y-axis value
+  offset3 = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); // Z-axis value
+  tempC = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); //get temperature
+  offset4 = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); // X-axis value
+  offset5 = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); // Y-axis value
+  offset6 = ((Wire.read() << 8 | Wire.read()) / (16384.0*2)); // Z-axis value
 
-  digitalWrite(MTU_INTR_PIN,HIGH);  
-}
-#endif
+  digitalWrite(MPU_INTR_PIN,HIGH);
 
-/*****************************
- *   PWM specific functions  *
- *****************************/
-
-#ifndef NOPWM
-void SetupPWM() {
-
-  pinMode(PWM_MOTOR1_PIN,OUTPUT);
-  pinMode(PWM_MOTOR2_PIN,OUTPUT);
-  pinMode(PWM_MOTOR3_PIN,OUTPUT);
-  pinMode(PWM_MOTOR4_PIN,OUTPUT);
-
-  motor1=0;
-  motor2=0;
-  motor3=0;
-  motor4=0;
-
-  analogWrite(PWM_MOTOR1_PIN,0);
-  analogWrite(PWM_MOTOR2_PIN,0);
-  analogWrite(PWM_MOTOR3_PIN,0);
-  analogWrite(PWM_MOTOR4_PIN,0);
-
-  digitalWrite(PWM_MOTOR1_PIN,LOW);
-  digitalWrite(PWM_MOTOR2_PIN,LOW);
-  digitalWrite(PWM_MOTOR3_PIN,LOW);
-  digitalWrite(PWM_MOTOR4_PIN,LOW);
-
-}
-#endif
-
-#ifndef NOUSB
-
-  #ifdef DEBUGPWM
-  void DebugPWM() {
-    Serial.print("Motors: ");
-    Serial.print((byte)motor1);
-    Serial.print(' ');
-    Serial.print((byte)motor2);
-    Serial.print(' ');
-    Serial.print((byte)motor3);
-    Serial.print(' ');
-    Serial.print((byte)motor4);
-
+  for (int i;i<(setSize*6);i++) {
+    mpuChange[i]=0;
   }
-  #endif
+
+  //get a reading to fill the arrays
+  Gyroscope1();
+  Gyroscope2();
+  Gyroscope4();
+
+}
+#endif
 
 /*****************************
  *   GPS specific functions  *
  *****************************/
  
+
+#ifndef NOUSB
 #ifndef NOGPS
 #ifdef DEBUGGPS
 
@@ -734,10 +536,12 @@ void DebugGPS() {
   Serial.print(failed);
   if (chars == 0)
     Serial.print("** No characters received from GPS: check wiring **");
+    delay(1000);
 }
 #endif
 #endif
 #endif
+
 #ifndef NOGPS
 void Locator() {
   static bool newData;
@@ -759,187 +563,107 @@ void SetupGPS() {
 /*****************************
  *   USB specific functions  *
  *****************************/
- 
+
 #ifndef NOUSB
+
+String Padding(int Len, String Val) {
+  String ret="";
+  if ((Len-Val.length())>0)     
+    for (int i = 0 ; i < (Len-Val.length()); i++)  ret.concat(' ');
+  ret.concat(Val);
+  return ret;
+}
+
+void Monitor() {
+    if (Serial.available()) {
+      char ch = Serial.read();     
+      SerialRead(ch);
+    }
+}
 
 void SerialRead(char ch) {
 
-  static int chmode=1;
-
   switch (ch) {
-    case 'c':
-      chmode=2;
-      Serial.println("Conrolling Mode");
+    case '1':
+      Serial.println("PowerOn");
+      EnginesOn();
       break;
-    case 'i':
-      chmode=1;
-      Serial.println("Individual Mode");
+    case '2':
+      Serial.println("Accelerate");
+      Accelerate();
       break;
-    case 'f':
-      chmode=0;
-      Serial.println("Functional Mode");
+    case '3':
+      Serial.println("Breaking");
+      Breaking();
       break;
-    case '\r':
-    case '\n':
+    case '4':
+      Serial.println("LevelsOn");
+      LevelsOn();
       break;
-    default:
-      switch (chmode) {
-        case 2:
-          switch (ch) {
-            case 'w':
-              motor1++;
-              motor2++;
-              motor3++;
-              motor4++;
-              Serial.print("Motor seepd: ");
-              Serial.println(motor1);
-              break;
-            case 'a':
-              motor1--;
-              motor2--;
-              motor3--;
-              motor4--;
-              Serial.print("Motor seepd: ");
-              Serial.println(motor1);
-              break;
-            case 's':
-              targetX=0;
-              targetY=0;
-              targetZ=0;
-              break;
-            case 'u':
-              targetZ=100;
-              break;
-            case 'd':
-              targetZ=-100;
-              break;
-            case 'l':
-              targetX=-1;
-              break;
-            case 'r':
-              targetX=1;
-              break;
-            case 'g':
-              targetY=1;
-              break;
-            case 'b':
-              targetY=-1;
-              break;
-          }
-          break;
-  #ifndef NO74H
 
-        case 1:
-
-          EnableDisable(!m[ch-'0'].enable,ch-'0');
-          Serial.print("Logic ");
-          Serial.print((ch-'0'));
-          Serial.print(" Set ");
-          Serial.println(((m[ch-'0'].enable)?"On":"Off"));
-
-          break;
-        case 0:
-
-          switch (ch) {
-            case '0':
-              for (int i=0;i<8;i++) EnableDisable(false,i);
-              Serial.println("Zero Power");
-              motor1=0;
-              motor2=0;
-              motor3=0;
-              motor1=0;
-              break;
-            case '1':
-              for (int i=0;i<8;i++) EnableDisable(true,i);
-              Serial.println("Full Power");
-              break;
-            case '2':
-              for (int i=0;i<8;i++) EnableDisable(((i % 2)==1),i);
-              Serial.println("Even Power");
-              break;
-            case '3':
-              for (int i=0;i<8;i++) EnableDisable(((i % 2)==0),i);
-              Serial.println("Odd Power");
-              break;
-            case '4':
-              for (int i =0;i<8;i++) IncreaseDecrease(true,i,15);
-              Serial.println("Increased Pulse");
-              break;
-            case '5':
-              for (int i =0;i<8;i++) IncreaseDecrease(false,i,15);
-              Serial.println("Decreased Pulse");
-              break;
-            case '6':
-              for (int i =0;i<8;i++)
-                if ((i % 2)==0) {
-                  m[i].elapse=-m[i].latency;
-                } else {
-                  m[i].elapse=0;
-                }          
-              Serial.println("Alternate Pulse");
-              break;
-            case '7':
-              for (int i =0;i<8;i++) m[i].elapse=0;
-              Serial.println("Regulated Pulse");
-            case '8':
-              motor1=127;
-              motor2=127;
-              motor3=127;
-              motor4=127;
-              Serial.println("Half Power");
-            case '9':
-              motor1=255;
-              motor2=255;
-              motor3=255;
-              motor4=255;
-              Serial.println("Full Power");
-              break;
-          }  
-          break;
-  #endif 
-      } 
+      #ifndef NO74H
+    case '5':
+      Serial.println("IncreasePulse");
+      IncreaseDecrease(true, -1, PULSE_CHANGE_RATE);
       break;
-  }  
+    case '6':
+      Serial.println("DecreasePulse");
+      IncreaseDecrease(false, -1, PULSE_CHANGE_RATE);
+      break;
+    case '7':
+      Serial.println("LevelHi");
+      RatePulseInterval(-1,MIN_74H_PULSE);
+      break;
+    case '8':
+      Serial.println("LevelLo");
+      RatePulseInterval(-1,MAX_74H_PULSE);
+      break;
+     #endif
+    case '9':
+      Serial.println("FullSpeed");
+      EngineFullSpeed();
+      break;
+    case '0':
+      Serial.println("PowerOff");
+      EnginesOff();
+      break;
+  }
 
 }
+
 #endif
 
-/*****************************
- *   ESP specific functions  *
- *****************************/
- 
-#ifndef NOESP
 
 void Driver() {
     
   String txt = Serial.readStringUntil('\n');
-      
+
   while (txt.length()>0) {        
     switch (txt.charAt(0))
     {
-      case 's':
+      case 's': //middle switch on controller
         if (txt.length()>1)
           if ((txt.charAt(1)=='1')||(txt.charAt(1)=='0'))
-            Switch = (txt.charAt(1)=='0');
+            Switch = (txt.charAt(1)=='1');
         txt.remove(0,2);
         break;
-      case 'd':
+      case 'd': //right axis depress switch on controller
         if (txt.length()>1)
           if ((txt.charAt(1)=='1')||(txt.charAt(1)=='0'))
-            Depress = (txt.charAt(1)=='1');
+            Depress = (txt.charAt(1)!='1');
         txt.remove(0,2);
         break;
-      case 'x':    
+      case 'x':  //right axis left or right
         if (txt.length()>4)
           AxisX = Convert(txt.substring(1,5));
         txt.remove(0,5);
         break;      
-      case 'y':    
+      case 'y': //right axis up or down
         if (txt.length()>4)
           AxisY = Convert(txt.substring(1,5));
         txt.remove(0,5);
         break;      
-      case 'z':    
+      case 'z': //left dial clockwise or counter clockwise   
         if (txt.length()>4)
           AxisZ = Convert(txt.substring(1,5));
         txt.remove(0,5);
@@ -951,46 +675,49 @@ void Driver() {
     }        
 
     static bool toggler[2]={false,false};
-    static int oddEven=-1;
+    
+    //switch turns all motor controlls on or off
+    //axisz is altitude control fall/hold/climb
+    //axisx is yaw, aim the drone to a direction
+    //axisy forward/backward controls the drone
+    //depress auto holds, twice returns to start
     
     if (Switch) {
       if (!toggler[0]) {
         toggler[0]=true;
-        powersOn=!powersOn;
-        oddEven=-1;
-        for (int i=0;i<8;i++) EnableDisable(powersOn,i);
-        if (!powersOn) {
-          motor1=0;
-          motor2=0;
-          motor3=0;
-          motor1=0;
+        if ((motor1!=0)||(motor2!=0)||(motor3!=0)||(motor4!=0)) {
+          EnginesOff();
+        } else {
+          EnginesOn();
         }
       }
     } else if (toggler[0]) toggler[0]=false;
-    
+
     if (Depress) {
-      if (!toggler[1]) {
-        toggler[1]=true;
-        oddEven++;
-        if (oddEven==2) {
-          oddEven=-1;
-          for (int i=0;i<8;i++) EnableDisable(powersOn,i);          
-        } else for (int i=0;i<8;i++) 
-          EnableDisable(((bool)((i % 2)==oddEven)),i);
-      }
-    } else if (toggler[1]) toggler[1]=false;
-  
-    static long lastAxisZ=0;
-    if ((lastAxisZ!=AxisZ)&&powersOn) {   
-      motor1=map(AxisZ,0,1024, 0,255);
-      motor2=map(AxisZ,0,1024, 0,255);
-      motor3=map(AxisZ,0,1024, 0,255);
-      motor4=map(AxisZ,0,1024, 0,255);
-      lastAxisZ=AxisZ;
-    }
+      if (!toggler[0]) toggler[0]=true;
+    } else if (toggler[0]) toggler[0]=false;
+
   } 
 
+  #ifdef DEBUGESP
+    #ifndef NOUSB
+  
+      Serial.print(String(Switch));
+      Serial.print(' ');
+      Serial.print(String(Depress));
+      Serial.print(' ');
+      Serial.print(String(AxisX));
+      Serial.print(' ');
+      Serial.print(String(AxisY));
+      Serial.print(' ');
+      Serial.println(String(AxisZ));
+  
+    #endif
+  #endif
+  
 }
+
+#ifndef NOESP
 
 void SetupESP() {
   #ifndef NOUSB
@@ -999,22 +726,174 @@ void SetupESP() {
   Serial.begin(UNIFIED_BAUD_RATE);
   pinMode(ESP_CHIP_EN_PIN,OUTPUT);
   digitalWrite(ESP_CHIP_EN_PIN,LOW);
+  #ifndef NOESP
   Serial1.begin(UNIFIED_BAUD_RATE);  
   digitalWrite(ESP_CHIP_EN_PIN,HIGH);
   Serial.setTimeout(NETWORK_YEILDING);
+  #endif
   #endif
 }
 
 #endif
 
-/*******************************
- *   Setup and Loop Functions  *
- *******************************/
+#ifndef NOPWM
+
+/*********************
+ *   Engine Private  *
+ *********************/
  
+void Engines() {
+  if (motor1>0) {
+    if (motor1>PWM_MAX_SPEED)
+      motor1=PWM_MAX_SPEED; 
+    else if (motor1<PWM_MIN_SPEED)
+      motor1=PWM_MIN_SPEED;
+  } else if (motor1<0) motor1=0;
+  if (motor2>0) {
+    if (motor2>PWM_MAX_SPEED)
+      motor2=PWM_MAX_SPEED;
+    else if (motor2<PWM_MIN_SPEED)
+      motor2=PWM_MIN_SPEED;
+  } else if (motor2<0) motor2=0;
+  if (motor3>0) {
+    if (motor3>PWM_MAX_SPEED)
+      motor3=PWM_MAX_SPEED;
+    else if (motor3<PWM_MIN_SPEED)
+      motor3=PWM_MIN_SPEED;
+  } else if (motor3<0) motor3=0;
+  if (motor4>0) {
+    if (motor4>PWM_MAX_SPEED)
+      motor4=PWM_MAX_SPEED;
+    else if (motor4<PWM_MIN_SPEED)
+      motor4=PWM_MIN_SPEED;
+  } else if (motor4<0) motor4=0;
+
+  analogWrite(PWM_MOTOR1_PIN,motor1);
+  analogWrite(PWM_MOTOR2_PIN,motor2);
+  analogWrite(PWM_MOTOR3_PIN,motor3);
+  analogWrite(PWM_MOTOR4_PIN,motor4);
+
+}
+
+/********************
+ *   Engine Public  *
+ ********************/
+
+void EngineShutdown() {   
+  motor1=0;
+  motor2=0;
+  motor3=0;
+  motor4=0;
+  Engines();
+  #ifndef NO74H
+  LightIndicator(false);
+  #endif
+}
+void EngineTaxiState() {
+  motor1=PWM_MIN_SPEED;
+  motor2=PWM_MIN_SPEED;
+  motor3=PWM_MIN_SPEED;
+  motor4=PWM_MIN_SPEED;
+  Engines();
+  #ifndef NO74H
+  LightIndicator(true);
+  #endif
+}
+void EngineFullSpeed() {
+  motor1=PWM_MAX_SPEED;
+  motor2=PWM_MAX_SPEED;
+  motor3=PWM_MAX_SPEED;
+  motor4=PWM_MAX_SPEED;
+  Engines();
+  #ifndef NO74H
+  LightIndicator(true);
+  #endif
+}
+void Accelerate() {
+  motor1=motor1+PWM_CHANGE_RATE;
+  motor2=motor2+PWM_CHANGE_RATE;
+  motor3=motor3+PWM_CHANGE_RATE;
+  motor4=motor4+PWM_CHANGE_RATE;
+  Engines();
+  #ifndef NO74H
+  LightIndicator(true);
+  #endif
+}
+void Breaking() {
+  motor1=motor1-PWM_CHANGE_RATE;
+  motor2=motor2-PWM_CHANGE_RATE;
+  motor3=motor3-PWM_CHANGE_RATE;
+  motor4=motor4-PWM_CHANGE_RATE;
+  Engines();
+  #ifndef NO74H
+  LightIndicator(false);
+  #endif
+}
+  
+void SetupPWM() {
+
+  pinMode(PWM_MOTOR1_PIN,OUTPUT);
+  pinMode(PWM_MOTOR2_PIN,OUTPUT);
+  pinMode(PWM_MOTOR3_PIN,OUTPUT);
+  pinMode(PWM_MOTOR4_PIN,OUTPUT);
+
+  analogWrite(PWM_MOTOR1_PIN,0);
+  analogWrite(PWM_MOTOR2_PIN,0);
+  analogWrite(PWM_MOTOR3_PIN,0);
+  analogWrite(PWM_MOTOR4_PIN,0);
+  motor1=0;
+  motor2=0;
+  motor3=0;
+  motor4=0;
+
+}
+
+#endif
+
+void LevelsOn() {
+  #ifndef NO74H
+    EnableDisable(true,4);
+    EnableDisable(true,5);
+    EnableDisable(true,6);
+    EnableDisable(true,7);    
+  #endif
+}
+void LevelsOff() {
+  #ifndef NO74H
+    EnableDisable(false,4);
+    EnableDisable(false,5);
+    EnableDisable(false,6);
+    EnableDisable(false,7);  
+  #endif
+}
+
+void EnginesOff() {
+  if (poweredUp) {
+    LevelsOff();
+    #ifndef NOPWM
+      EngineShutdown();
+     #endif
+    poweredUp = false;
+  }
+}
+
+void EnginesOn() {
+  if (!poweredUp) {
+    #ifndef NOPWM
+      EngineTaxiState();
+    #endif
+    poweredUp = true;
+  }
+}
+
+
 void setup() 
 {
-  pinMode(LED_BLINK_PIN, OUTPUT);
-
+ // pinMode(LED_BLINK_PIN,OUTPUT);
+  #ifndef NOUSB 
+   Serial.begin(UNIFIED_BAUD_RATE);
+   #endif
+   
   #ifndef NOESP
   SetupESP();
   #endif    
@@ -1027,105 +906,98 @@ void setup()
   Setup74H();
   #endif
 
-  #ifndef NOMTU
-  SetupMTU();
+  #ifndef NOMPU
+  SetupMPU();
   #endif
   
   #ifndef NOPWM
   SetupPWM();
   #endif 
- 
 }
 
-void loop()
-{
 
-  #ifndef NOMTU       
-  Accellerator1();
-  #endif
+  
+void loop() 
+{ 
 
-  #ifndef NO74H
-  Governer();
-  #endif
 
   #ifndef NOUSB
-    if (Serial.available()) {
-      char ch = Serial.read();
-      SerialRead(ch);
-    }
+  Monitor(); //handles input for output serial debugging
   #endif
   
   #ifndef NOESP
-  Driver();
+  Driver(); //reads from the network for the controller 
   #endif
 
   #ifndef NO74H
-  Governer();
+  Governer(); //updates the 74HC595 with elapsed timings
   #endif
   
-  #ifndef NOMTU
-  Accellerator2();
-  #endif
-  
-  #ifndef NO74H
-  Governer();
-  #endif
- 
-  #ifndef NOMTU
-  Accellerator3();
-  #else
-  Accellerator();
-  #endif  
-
-  #ifndef NO74H
-  Governer();
+  #ifndef NOMPU
+  Gyroscope1();  //first half of retrieval of gyro info
   #endif
 
-  #ifndef NOGPS
-  Locator();  
-  #endif      
 
-  #ifndef NO74H
-  Governer();
-  #endif
 
   #ifndef NOUSB
-   #ifndef NOPWM
-    #ifdef DEBUGPWM
-      DebugPWM();
-      #ifdef DEBUGMTU
-        Serial.print(' ');
-       #else
-         #ifdef DEBUGGPS
-          Serial.print(' ');
-         #else
-          Serial.println();
-         #endif
-       #endif
-      #endif
-     #endif
-     #ifndef NOMTU
-      #ifdef DEBUGMTU    
-        DebugMTU();
-        #ifdef DEBUGGPS
-          Serial.print(' ');
-        #else
-          Serial.println();
-        #endif
-      #endif
-      #ifndef NOGPS    
-        #ifdef DEBUGGPS
-          DebugGPS();
-          Serial.println(); 
-        #endif
-      #endif
-    #else
-      #ifndef NOGPS
-        #ifdef DEBUGGPS
-          DebugGPS();
-          Serial.println(); 
-        #endif
+  Monitor(); //handles input for output serial debugging
+  #endif
+  
+  #ifndef NOESP
+  Driver(); //reads from the network for the controller 
+  #endif
+  
+  #ifndef NO74H
+  Governer(); //updates the 74HC595 with elapsed timings
+  #endif
+  
+  #ifndef NOMPU
+  Gyroscope3(); //second half of retrieval of gyro info
+  #endif
+
+
+
+  #ifndef NOUSB
+  Monitor(); //handles input for output serial debugging
+  #endif
+  
+  #ifndef NOESP
+  Driver(); //reads from the network for the controller 
+  #endif
+
+  #ifndef NO74H
+  Governer(); //updates the 74HC595 with elapsed timings
+  #endif
+  
+  #ifndef NOGPS
+  Locator(); //reads the GPS information
+  #endif
+
+
+
+  #ifndef NOUSB
+
+    #ifndef NOPWM
+      #ifdef DEBUGPWM
+        DebugPWM();
+        Serial.println();
       #endif
     #endif
+    
+    #ifndef NOMPU
+      #ifdef DEBUGMPU    
+        DebugMPU();
+        Serial.println();
+      #endif
+    #endif
+   
+    #ifndef NOGPS
+      #ifdef DEBUGGPS
+        DebugGPS();
+        Serial.println(); 
+      #endif
+    #endif
+
   #endif
+
 }
