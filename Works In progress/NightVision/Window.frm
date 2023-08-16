@@ -86,7 +86,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-Private Const packetSize As Long = (4 * 23)
+Private Const packetSize As Long = (8 * 16)
 Private Const pixelHeight = 20
 Private Const pixelWidth = 20
 
@@ -98,7 +98,7 @@ Private Declare Sub RtlMoveMemory Lib "kernel32" (Dest As Any, ByVal Source As L
 
 
 Private Sub Form_Load()
-    CommPort.ListIndex = 5
+    CommPort.ListIndex = 12
     ConnectButton_Click
 End Sub
 
@@ -119,15 +119,6 @@ Private Sub ConnectButton_Click()
     End If
 End Sub
 
-Private Sub ConsoleText_Change()
-    ConsoleText.SelStart = Len(ConsoleText.Text)
-End Sub
-
-Private Sub CommandText_KeyPress(KeyAscii As Integer)
-    If KeyAscii = 13 Then
-        SendButton_Click
-    End If
-End Sub
 
 Private Function PortOpen() As Boolean
     On Error GoTo errorcatch
@@ -186,7 +177,7 @@ Public Sub ProcessSerial()
             For i = LBound(inc) To UBound(inc)
 
                 debugtxt = debugtxt & IIf(Len(CStr(inc(i))) < 3, String(3 - Len(CStr(inc(i))), " ") & inc(i), inc(i)) & " "
-                If (i + 1) Mod 23 = 0 Then debugtxt = debugtxt & vbCrLf
+                If (i + 1) Mod 16 = 0 Then debugtxt = debugtxt & vbCrLf
             Next
             Picture1.Cls
             
