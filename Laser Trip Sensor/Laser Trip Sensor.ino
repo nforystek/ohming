@@ -1,81 +1,93 @@
-#define analog1 A0
-#define digital1 12
-#define analog2 A1
-#define digital2 11
-#define analog3 A2
-#define digital3 10
-#define analog4 A3
-#define digital4 9
+
+//shared defines
 #define tripAtVal 980
 
-bool last1=false;bool last2=false;
-bool last3=false;bool last4=false;
-int aval1=0;int aval2=0;
-int aval3=0;int aval4=0;
+//per trip defines
+#define analog1 A0
+#define digital1 12
+//per trip variables
+int aval1=0;
+bool last1=false;
+int prior1=tripAtVal;
+int grace1 =tripAtVal;
+//end trip declares
+
+////per trip defines
+//#define analog2 A1
+//#define digital2 11
+////per trip variables
+//int aval2=0;
+//bool last2=false;
+//int prior2=tripAtVal;
+//int grace2 =tripAtVal;
+////end trip declares
 
 void setup() {
-  Serial.begin(115200);   
+  Serial.begin(115200);
+
+  //setup for the trip
+  pinMode(analog1, INPUT);  
   pinMode(digital1,OUTPUT);
   digitalWrite(digital1, HIGH);
-  last1=(analogRead(analog1)<tripAtVal);  
-  pinMode(digital2,OUTPUT);
-  digitalWrite(digital2, HIGH);
-  last2=(analogRead(analog2)<tripAtVal);
-  pinMode(digital3,OUTPUT);
-  digitalWrite(digital3, HIGH);
-  last3=(analogRead(analog3)<tripAtVal);
-  pinMode(digital4,OUTPUT);
-  digitalWrite(digital4, HIGH);
-  last4=(analogRead(analog4)<tripAtVal);    
-}
-void loop() {
-  aval1 = analogRead(analog1);  
-  aval2 = analogRead(analog2);  
-  aval3 = analogRead(analog3); 
-  aval4 = analogRead(analog4);  
-  if (aval1<tripAtVal) {
-      if (!last1) {
-        Serial.print('1');
-        last1=true;
-      }
-  } else if (aval1>=tripAtVal) {
-      if (last1) {
-        Serial.print('5');
-        last1=false;
-      }
-  }  
-  if (aval2<tripAtVal) {
-      if (!last2) {
-        Serial.print('2');
-        last2=true;
-      }
-  } else if (aval2>=tripAtVal) {
-      if (last2) {
-        Serial.print('6');
-        last2=false;
-      }
-  }  
-  if (aval3<tripAtVal) {
-      if (!last3) {
-        Serial.print('3');
-        last3=true;
-      }
-  } else if (aval3>=tripAtVal) {
-      if (last3) {
-        Serial.print('7');
-        last3=false;
-      }
-  }  
-  if (aval4<tripAtVal) {
-      if (!last4) {
-        Serial.print('4');
-        last4=true;
-      }
-  } else if (aval4>=tripAtVal) {
-      if (last4) {
-        Serial.print('8');
-        last4=false;
-      }
-  }
+  last1=(analogRead(analog1)<tripAtVal);
+  //end trip setup
 
+//  //setup for the trip
+//  pinMode(analog2, INPUT);  
+//  pinMode(digital2,OUTPUT);
+//  digitalWrite(digital2, HIGH);
+//  last2=(analogRead(analog2)<tripAtVal);
+//  //end trip setup
+}
+
+void loop() {
+
+  //loop for the trip
+  aval1 = analogRead(analog1);
+  if (aval1<tripAtVal) {
+    if ((aval1<=prior1)||(aval1<=grace1)) {
+      grace1=aval1;
+    } else if (aval1>grace1) {
+      if (!last1) {
+        Serial.print('1');          
+        last1=true;      
+      }
+    }
+  } else if (aval1>=tripAtVal) {
+    if ((aval1>=prior1)||(aval1>=grace1)) {
+      grace1=aval1;
+    } else if (aval1<grace1) {
+      if (last1) {
+        Serial.print('2');
+        last1=false;  
+      }
+    }
+  }
+  prior1=aval1;
+  //end trip loop
+
+//  //loop for the trip
+//  aval2 = analogRead(analog2);
+//  if (aval2<tripAtVal) {
+//    if ((aval2<=prior2)||(aval2<=grace2)) {
+//      grace2=aval2;
+//    } else if (aval2>grace2) {
+//      if (!last2) {
+//        Serial.print('3');          
+//        last2=true;      
+//      }
+//    }
+//  } else if (aval2>=tripAtVal) {
+//    if ((aval2>=prior2)||(aval2>=grace2)) {
+//      grace2=aval2;
+//    } else if (aval2<grace2) {
+//      if (last2) {
+//        Serial.print('4');
+//        last2=false;  
+//      }
+//    }
+//  }
+//  prior2=aval2;
+//  //end trip loop
+  
 }
