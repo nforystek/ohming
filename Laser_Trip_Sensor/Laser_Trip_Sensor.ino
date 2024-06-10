@@ -1,3 +1,15 @@
+//this is a bit more indepth sensor check than
+//what is in the schematic picture showing code.
+//if your Arduino has zero static intereferences
+//and you get clean exact numerical repeat values
+//for reading your analog ports this isn't better.
+//for those of us that fondle our Arduino with out
+//hands, this code monitors the minor changes each
+//read accomodating for toggle leans and acurate
+//trip readings with out repeating for both open
+//and close actions that must happen in toggling.
+//never the less it is two more int variables to
+//each trip, so if you got a better idea, use it!
 
 //shared defines
 #define tripAtVal 1000
@@ -53,7 +65,7 @@ void loop() {
         last1=true;      
       }
     }
-  } else if (aval1>=tripAtVal) {
+  } else if (aval1>tripAtVal) {
     if ((aval1>=prior1)||(aval1>=grace1)) {
       grace1=aval1;
     } else if (aval1<grace1) {
@@ -77,7 +89,7 @@ void loop() {
 //        last2=true;      
 //      }
 //    }
-//  } else if (aval2>=tripAtVal) {
+//  } else if (aval2>tripAtVal) {
 //    if ((aval2>=prior2)||(aval2>=grace2)) {
 //      grace2=aval2;
 //    } else if (aval2<grace2) {
