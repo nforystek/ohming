@@ -1,6 +1,6 @@
 
 //shared defines
-#define tripAtVal 980
+#define tripAtVal 1000
 
 //per trip defines
 #define analog1 A0
