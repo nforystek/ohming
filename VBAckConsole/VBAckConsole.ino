@@ -1,12 +1,13 @@
 
 bool doblink=false;
 static unsigned long elapsed;
-int Handshake = 0;
+int Handshake = 1;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
   elapsed=millis();
+  Handshake=1;
 }
 
 void Blinker() {
@@ -79,6 +80,11 @@ void ProcessPackets() {
   if (Serial.available())  data += ((char)Serial.read());    
   switch ((data=="")?'0':data.charAt(0))
   {
+    case '1':
+      Handshake=1; //the routine wont
+      //handle single byte packets now
+      //with handshake, they must be 2+
+      break;
     case '0':
       Serial.print(DataSend(""));
       break;
@@ -91,28 +97,46 @@ void ProcessPackets() {
           data = data.substring(bl);
         else
           data = "";          
-      } else if (Serial.available()) data += ((char)Serial.read());
+      } else if (Serial.available()) {
+        data += ((char)Serial.read());
+      } else {
+        //TODO: timeout waiting and reset handhsake
+        //to tell the remote serial to repeat packet
+      }     
       break;
   }
 }
 
+int Toggler(int val) {
+  switch (val)
+    {
+      case 1:
+        return 0;
+      case 0:
+        return -1;
+      default:
+        return 1;
+    }
+}
+
 void ProcessSerial() {  
   char inc=' ';  
-  if (Handshake==2) {
-     ProcessPackets();
-  } else {
-    if (Serial.available()) inc=(char)Serial.read();  
-    if (inc!=' ') {
-      Serial.print(inc);
-      Handshake=((inc==1)?Handshake+1:0);
-    }   
+  switch (Handshake)
+  {
+    case 0:
+    case 1:
+      if (Serial.available()) {
+        inc=(char)Serial.read();
+        Serial.print(String(fabs(Handshake)).charAt(0));
+        Handshake = Toggler(Handshake);
+      }      
+      break;
+    case -1:
+       ProcessPackets();
+       break;
   }
 }
 
 void loop() {
   ProcessSerial();
-  if (millis()-elapsed>100) {
-    elapsed=millis();
-    Blinker();
-  }
 }

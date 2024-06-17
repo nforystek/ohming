@@ -69,7 +69,6 @@ Option Explicit
 Private Handshake As Integer
 Private Header As Boolean
 
-
 Private Sub SendButton_Click()
     DataSend CommandText.Text
     CommandText.Text = ""
@@ -114,10 +113,11 @@ Private Function PortOpen() As Boolean
         Handshake = 0
     End If
     If Not Arduino.PortOpen Then
-        Arduino.CommPort = 14
+        Arduino.CommPort = 5
         Arduino.Settings = "115200,N,8,1"
         Arduino.InBufferSize = 1
         Arduino.OutBufferSize = 1
+        Handshake = 1
         Arduino.PortOpen = True
     End If
     
@@ -166,6 +166,10 @@ Public Sub ProcessPackets()
     Dim bl As Byte
     data = data & Arduino.Input
     Select Case Asc(IIf(data = "", Chr(0), Left(data, 1)))
+        Case 1
+            Handshake = 1 'the routine wont
+            'handle single byte packets now
+            'with handshake, they must be 2+
         Case 0
             Arduino.Output = DataSend
         Case Else
@@ -175,34 +179,73 @@ Public Sub ProcessPackets()
                 data = Mid(data, 2)
                 DebugText Left(data, bl)
                 data = Mid(data, bl + 1)
-            Else 'buffer is under the amount of data for recrd
+            ElseIf Arduino.InBufferCount > 0 Then
+                'buffer is under the amount of data for recrd
                 data = data & Arduino.Input
+            Else
+                'TODO: timeout waiting and reset handhsake
+                'to tell the remote serial to repeat packet
             End If
     End Select
 End Sub
 
+Public Function Toggler(ByVal Value As Long) As Long
+    Toggler = (-CInt(CBool(Value)) + -1) + -CInt(Not CBool(-Value + -1))
+End Function
+
 Public Sub ProcessSerial()
+    '
+    'the Handshake helps stop initial garbage sends
+    'and transactions packets to thoroughly complete
+    'or repeat handshake for any packet that is loss
+    '
+    'it starts at 1 repeating send until the remote
+    'responds with the same, and then has to do so
+    'with 0 to know the remote is aware and not still
+    'sending failed packets to unhandled information
+    '
+    'each poacket after a handshake toggles the bit
+    '0 or 1, or char in this case, and a repeat of
+    'the 0 or 1 in a packet row is a request resend
+    'which then needs to handshake again, so in data
+    'or connection loss the handshake must be redone
+    '
+    'this implementation so far occurs handshake
+    'and lets the packets through from then on, no
+    'header or stop bit, assuming the arduino will
+    'preform from then on, and that will be tragic
+    '
+    
     Dim inc As String
     If Arduino.PortOpen Then
-        Select Case Abs(Handshake)
-            Case 2
-                ProcessPackets
-            Case Else
-                If Arduino.InBufferCount > 0 Then
-                    inc = Arduino.Input
-                    If (Handshake = 0) And inc = Chr(1) Then Handshake = 2
+        Select Case Handshake
+            Case 0, 1
+                '
+                'a carrier and receiver is defined by who
+                'inititates connection to who in calling
+                'that is the difference between this short
+                'piece of handshake code and the one uploaded
+                'to the arduino, since it never connects out
+                'then we don't need to make each preform both
+                'the arduino of course, reads first in 1 loop
+                'only if exists, sending secondly, this part
+                'sends first, loops, then reads, as carrier
+                '
+                If Arduino.InBufferCount = 0 Then
+                    Arduino.Output = CStr(Abs(Handshake))
+                    Debug.Print ">" & CStr(Abs(Handshake))
                 Else
-                    Handshake = 0
+                    inc = Arduino.Input
+                    Debug.Print "<" & inc
+                    Handshake = Toggler(Handshake)
                 End If
-                If Abs(Handshake) < 2 Then
-                    Arduino.Output = Chr(Abs(Handshake))
-                    Handshake = (-CInt(CBool(Handshake)) + -1) + -CInt(Not CBool(-Handshake + -1))
-                End If
+            Case -1
+                ProcessPackets
         End Select
     End If
 End Sub
 
 Private Sub MainLoop_Timer()
     ProcessSerial
-    SendButton.Enabled = (Handshake = 2) And Arduino.PortOpen
+    SendButton.Enabled = (Handshake = -1) And Arduino.PortOpen
 End Sub
