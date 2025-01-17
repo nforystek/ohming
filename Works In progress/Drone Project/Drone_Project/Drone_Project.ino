@@ -4,11 +4,11 @@
  
 //Comment out NOUSB to preserve resource when
 //operating, no serial debug will be outputted
-//#define NOUSB
+#define NOUSB
 
 //Comment out NOESP to have serial input and
 //output conole control connected to the USB.
-#define NOESP
+//#define NOESP
 
 //Comment out NO74H to ignore the 74H chip
 //absent auxiliary logics in operating mode
@@ -21,7 +21,7 @@
 //Comment ou no MPU to disable the
 //pitch/yaw/tilt motion sensor chip
 
-//#define NOMPU
+#define NOMPU
 
 //Comment out NOPWM to disable the use of
 //the four capable analogWrite digitals
@@ -30,7 +30,7 @@
 
 //Comment out NOLED to disable the use of
 //the four analog pins used to light LEDs
-//#define NO LED
+#define NOLED
 
 /************************
  *   Debugging defines  *
@@ -663,7 +663,7 @@ void Locator() {
 }
 
 void SetupGPS() {
-  Serial2.begin(9600);
+  Serial2.begin(UNIFIED_BAUD_RATE);
 }
 #endif
 
@@ -951,7 +951,7 @@ void Driver() {
        // while (IsALN(txt.charAt(0))) txt.remove(0,1);  
         break;
     } 
-   // while (IsNum(txt.charAt(0))) txt.remove(0,1);
+   // while (IsALN(txt.charAt(0))) txt.remove(0,1);
   
   
   } 
@@ -973,11 +973,6 @@ void Driver() {
     switchToggle=false;
   }
 
-
-     
-  Engines();
-
-
   if (Depress) {
     if (!depressToggle) {
       depressToggle=true;
@@ -994,60 +989,30 @@ void Driver() {
     depressToggle=false;
   }
 
-  if (leveling) {
-    if (AxisX<0) {
-      TempAxii=map(-AxisX, 0, 512, MIN_74H_PULSE, MAX_74H_PULSE);
-      RatePulseInterval(0, TempAxii);
-      RatePulseInterval(1, TempAxii);
-      RatePulseInterval(2, MAX_74H_PULSE);
-      RatePulseInterval(3, MAX_74H_PULSE);
 
-      RatePulseInterval(4, TempAxii);
-      RatePulseInterval(5, TempAxii);
-      RatePulseInterval(6, MAX_74H_PULSE);
-      RatePulseInterval(7, MAX_74H_PULSE);
-    } else if (AxisX>0) {
-      TempAxii=map(AxisX, 0, 512, MIN_74H_PULSE, MAX_74H_PULSE);
-      RatePulseInterval(2, TempAxii);
-      RatePulseInterval(3, TempAxii);
-      RatePulseInterval(0, MAX_74H_PULSE);
-      RatePulseInterval(1, MAX_74H_PULSE);
 
-      RatePulseInterval(6, TempAxii);
-      RatePulseInterval(7, TempAxii);
-      RatePulseInterval(4, MAX_74H_PULSE);
-      RatePulseInterval(5, MAX_74H_PULSE);      
-    }
-  
-    if (AxisY<0) {
-      TempAxii=map(-AxisY, 0, 512, MIN_74H_PULSE, MAX_74H_PULSE);
-      RatePulseInterval(1,TempAxii);
-      RatePulseInterval(2, TempAxii);      
-      RatePulseInterval(3, MAX_74H_PULSE);
-      RatePulseInterval(0, MAX_74H_PULSE);
 
-      RatePulseInterval(5,TempAxii);
-      RatePulseInterval(6, TempAxii);      
-      RatePulseInterval(7, MAX_74H_PULSE);
-      RatePulseInterval(4, MAX_74H_PULSE);
-    } else if (AxisY>0) {
-      TempAxii=map(AxisY, 0, 512, MIN_74H_PULSE, MAX_74H_PULSE);
-      RatePulseInterval(3, TempAxii);
-      RatePulseInterval(0, TempAxii);
-      RatePulseInterval(1, MAX_74H_PULSE);
-      RatePulseInterval(2, MAX_74H_PULSE);
+        if (powered) {
+          motor1= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+          motor2= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+          motor3= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+          motor4= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+          Engines();
+        }  
 
-      RatePulseInterval(7, TempAxii);
-      RatePulseInterval(4, TempAxii);
-      RatePulseInterval(5, MAX_74H_PULSE);
-      RatePulseInterval(6, MAX_74H_PULSE);
-    }
-
-    if ((AxisX==0)&&(AxisY==0)) {
-      RatePulseInterval(-1, MIN_74H_PULSE);      
-    }
-    
-  }  
+//  if (leveling) {
+//      int  left = map(AxisX, -1024, 0, MIN_74H_PULSE, MAX_74H_PULSE);
+//      int  right = map(AxisX, 0, 1024, MIN_74H_PULSE, MAX_74H_PULSE);
+//  
+//      int  up = map(AxisY, -1024, 0, MIN_74H_PULSE, MAX_74H_PULSE);
+//      int  down = map(AxisY, 0, 1024, MIN_74H_PULSE, MAX_74H_PULSE);
+//  
+//      RatePulseInterval(4,((left+up)/2));
+//      RatePulseInterval(5,((left+down)/2));
+//      RatePulseInterval(6,((right+up)/2));
+//      RatePulseInterval(7,((right+down)/2));    
+//  
+//  }  
     
   #ifdef DEBUGESP
    // #ifndef NOUSB
@@ -1072,26 +1037,29 @@ void Driver() {
 
 void SetupESP() {
 
-
-//  pinMode(ESP_CHIP_EN_PIN,OUTPUT);
-//  digitalWrite(ESP_CHIP_EN_PIN,LOW);
-//
-//  Serial1.begin(UNIFIED_BAUD_RATE);  
-//  digitalWrite(ESP_CHIP_EN_PIN,HIGH);
-//  Serial1.setTimeout(NETWORK_YEILDING);
-
-  #ifndef NOUSB
+  pinMode(ESP_CHIP_EN_PIN,OUTPUT);  
+  #ifdef NOUSB
   Serial.begin(UNIFIED_BAUD_RATE);
+  digitalWrite(ESP_CHIP_EN_PIN,HIGH);
   #else
-  Serial.begin(UNIFIED_BAUD_RATE);
-  pinMode(ESP_CHIP_EN_PIN,OUTPUT);
   digitalWrite(ESP_CHIP_EN_PIN,LOW);
-  #ifndef NOESP
   Serial1.begin(UNIFIED_BAUD_RATE);  
   digitalWrite(ESP_CHIP_EN_PIN,HIGH);
-  Serial.setTimeout(NETWORK_YEILDING);
+  Serial1.setTimeout(NETWORK_YEILDING);
+  Serial.begin(UNIFIED_BAUD_RATE);
   #endif
-  #endif
+
+
+                                                       
+//  pinMode(ESP_CHIP_EN_PIN,OUTPUT);
+//  digitalWrite(ESP_CHIP_EN_PIN,LOW);  
+//  #ifndef NOESP
+//  Serial1.begin(UNIFIED_BAUD_RATE); 
+//  digitalWrite(ESP_CHIP_EN_PIN,HIGH);  
+//  Serial.setTimeout(NETWORK_YEILDING);  
+//  #endif
+  
+
   
 }
 
@@ -1154,12 +1122,6 @@ void SetupLED() {
 void setup() 
 {
 
-
-  
-  #ifndef NOUSB 
-  Serial.begin(UNIFIED_BAUD_RATE);
-  #endif  
-
   #ifndef NOESP
   SetupESP();
   #endif    
@@ -1180,9 +1142,18 @@ void setup()
   SetupPWM();
   #endif 
 
-  #ifndef NOLEF
+  #ifndef NOLED
   SetupLED();
   #endif
+  
+  #ifndef NOUSB
+   #ifdef NOESP
+//    Serial.begin(UNIFIED_BAUD_RATE);
+//    #else
+//    Serial1.begin(UNIFIED_BAUD_RATE);
+    #endif
+  #endif
+
 }
 
 
