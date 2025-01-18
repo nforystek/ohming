@@ -16,17 +16,15 @@
 
 //Comment out no GPS to disable
 //the Neo-GPS location chip                                                                                     
-#define NOGPS
+//#define NOGPS
 
 //Comment ou no MPU to disable the
 //pitch/yaw/tilt motion sensor chip
-
-#define NOMPU
+//#define NOMPU
 
 //Comment out NOPWM to disable the use of
 //the four capable analogWrite digitals
 //#define NOPWM
-
 
 //Comment out NOLED to disable the use of
 //the four analog pins used to light LEDs
@@ -43,7 +41,6 @@
 
 //The following DEBUG puts all 10 logics into
 //a systems wiring check mode pulsing outputs
-
 //#define DEBUG74H
 
 //Uncomment for debugging the analogWrite PWM
@@ -112,7 +109,6 @@
 #define Z_AXIS_LOW 0
 #define Z_AXIS_MAX 1020
 
-
 //LED constants
 #define LED_1_PIN A0
 #define LED_2_PIN A1
@@ -138,9 +134,7 @@ SoftwareSerial Serial2(GPS_SERIAL_RX_PIN, GPS_SERIAL_TX_PIN);
 TinyGPS gps;
 #endif
 
-
 #ifndef NOLED
-
 bool beatToggle=false;
 unsigned long ledElapse = millis();
 #endif
@@ -161,7 +155,6 @@ struct utility {
   long elapse; //running time to a toggle enable
   long latency; //amount between enable toggling
 };
-
 struct utility m[8];
 unsigned char utilityRegister = 0;
 #endif
@@ -184,21 +177,21 @@ float flat, flon, falt;
 unsigned long age;
 #endif
 
-int avgcnt=0;
+//int avgcnt=0;
+//
+//float actualX, actualY, actualZ;
+//float offsetX, offsetY, offsetZ;
+//float pickupX, pickupY, pickupZ;
+//float medianX, medianY, medianZ;
+//float targetX, targetY, targetZ;
+//float virtueX, virtueY, virtueZ;
+//
+//unsigned long elapseTarget;
 
-float actualX, actualY, actualZ;
-float offsetX, offsetY, offsetZ;
-float pickupX, pickupY, pickupZ;
-float medianX, medianY, medianZ;
-float targetX, targetY, targetZ;
-float virtueX, virtueY, virtueZ;
-
-unsigned long elapseTarget;
-
-
-long AxisX=0, AxisY=0, AxisZ=0, TempAxii=0;
+long AxisX=0, AxisY=0, AxisZ=0;
 bool Switch=false, Depress=false;
-bool depressToggle=false; bool switchToggle=false;
+bool depressToggle=false;
+bool switchToggle=false;
 
 String RemoveNextArg(String *args, String delim) {
   String ret=String(*args);
@@ -710,40 +703,33 @@ void Engines() {
  *   Engine Public  *
  ********************/
 
-void EngineShutdown() {   
-  motor1=0;
-  motor2=0;
-  motor3=0;
-  motor4=0;
-  Engines();
-}
-void EngineTaxiState() {
-  motor1=PWM_MIN_SPEED;
-  motor2=PWM_MIN_SPEED;
-  motor3=PWM_MIN_SPEED;
-  motor4=PWM_MIN_SPEED;
-  Engines();
-}
+
 void EngineFullSpeed() {
-  motor1=PWM_MAX_SPEED;
-  motor2=PWM_MAX_SPEED;
-  motor3=PWM_MAX_SPEED;
-  motor4=PWM_MAX_SPEED;
-  Engines();
+  if (powered) {
+    motor1=PWM_MAX_SPEED;
+    motor2=PWM_MAX_SPEED;
+    motor3=PWM_MAX_SPEED;
+    motor4=PWM_MAX_SPEED;
+    Engines();
+  }
 }
 void Accelerate() {
-  motor1=motor1+PWM_CHANGE_RATE;
-  motor2=motor2+PWM_CHANGE_RATE;
-  motor3=motor3+PWM_CHANGE_RATE;
-  motor4=motor4+PWM_CHANGE_RATE;
-  Engines();
+  if (powered) {
+    motor1=motor1+PWM_CHANGE_RATE;
+    motor2=motor2+PWM_CHANGE_RATE;
+    motor3=motor3+PWM_CHANGE_RATE;
+    motor4=motor4+PWM_CHANGE_RATE;
+    Engines();
+  }
 }
 void Breaking() {
-  motor1=motor1-PWM_CHANGE_RATE;
-  motor2=motor2-PWM_CHANGE_RATE;
-  motor3=motor3-PWM_CHANGE_RATE;
-  motor4=motor4-PWM_CHANGE_RATE;
-  Engines();
+  if (powered) {
+    motor1=motor1-PWM_CHANGE_RATE;
+    motor2=motor2-PWM_CHANGE_RATE;
+    motor3=motor3-PWM_CHANGE_RATE;
+    motor4=motor4-PWM_CHANGE_RATE;
+    Engines();
+  }
 }
   
 void SetupPWM() {
@@ -767,23 +753,26 @@ void SetupPWM() {
 #endif
 
 void EnginesOff() {
-//  #ifndef NO74H
-//    LevelsOff();
-//  #endif
   #ifndef NOPWM
-    EngineShutdown();
+    motor1=0;
+    motor2=0;
+    motor3=0;
+    motor4=0;
+    Engines();
    #endif
    powered=false;
 }
 
 void EnginesOn() {
-//  #ifndef NO74H
-//    LevelsOn();
-//  #endif
-  #ifndef NOPWM
-    EngineTaxiState();
-  #endif
   powered=true;
+  #ifndef NOPWM
+    motor1=PWM_MIN_SPEED;
+    motor2=PWM_MIN_SPEED;
+    motor3=PWM_MIN_SPEED;
+    motor4=PWM_MIN_SPEED;
+    Engines();
+  #endif
+
 }
 
 /*****************************
@@ -895,7 +884,6 @@ void Driver() {
         break;
 
       case 'x': //right axis up or down
-
         if (txt.length()>4) {
           AxisX = Convert(txt.substring(1,5));
           txt.remove(0,5);
@@ -906,8 +894,7 @@ void Driver() {
             AxisX = map(AxisX, X_AXIS_MID, X_AXIS_MAX, 513, 1024);
             AxisX = AxisX-512;
           } else AxisX=0;
-        }
-        
+        }        
 
         break; 
       case 'y':  //right axis left or right
@@ -948,26 +935,21 @@ void Driver() {
       default:
         if (txt.length()>0)
           txt.remove(0,1);   
-       // while (IsALN(txt.charAt(0))) txt.remove(0,1);  
+        while (IsALN(txt.charAt(0))) txt.remove(0,1);  
         break;
     } 
-   // while (IsALN(txt.charAt(0))) txt.remove(0,1);
-  
-  
-  } 
-
-
+    //while (IsALN(txt.charAt(0))) txt.remove(0,1);
+    
+  }
 
   if (Switch) {
     if (!switchToggle) {
       switchToggle=true; 
-            if (powered) {
-//               Serial.println("EnginesOn");
-              EnginesOff();
-            } else {
-//               Serial.println("EnginesOff");
-              EnginesOn();
-            }
+      if (powered) {
+        EnginesOff();
+      } else {
+        EnginesOn();
+      }
     }    
   } else {
     switchToggle=false;
@@ -976,29 +958,23 @@ void Driver() {
   if (Depress) {
     if (!depressToggle) {
       depressToggle=true;
-      leveling=!leveling;
-
       if (leveling) {
-        EnableDisable(true,-1);   
-      } else {   
-        EnableDisable(false,-1);  
+        LevelsOff();
+      } else {
+        LevelsOn();
       }
-      
     }
   } else {
     depressToggle=false;
   }
 
-
-
-
-        if (powered) {
-          motor1= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-          motor2= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-          motor3= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-          motor4= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-          Engines();
-        }  
+  if (powered) {
+    motor1= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+    motor2= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+    motor3= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+    motor4= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+    Engines();
+  }  
 
 //  if (leveling) {
 //      int  left = map(AxisX, -1024, 0, MIN_74H_PULSE, MAX_74H_PULSE);
@@ -1015,7 +991,7 @@ void Driver() {
 //  }  
     
   #ifdef DEBUGESP
-   // #ifndef NOUSB
+    #ifndef NOUSB
   
       Serial.print(Switch);
       Serial.print(' ');
@@ -1028,7 +1004,7 @@ void Driver() {
       Serial.print(AxisZ);
       Serial.println();
   
-  //  #endif
+    #endif
   #endif
   
 }
@@ -1045,12 +1021,10 @@ void SetupESP() {
   digitalWrite(ESP_CHIP_EN_PIN,LOW);
   Serial1.begin(UNIFIED_BAUD_RATE);  
   digitalWrite(ESP_CHIP_EN_PIN,HIGH);
-  Serial1.setTimeout(NETWORK_YEILDING);
+  Serial.setTimeout(NETWORK_YEILDING);
   Serial.begin(UNIFIED_BAUD_RATE);
   #endif
-
-
-                                                       
+                                        
 //  pinMode(ESP_CHIP_EN_PIN,OUTPUT);
 //  digitalWrite(ESP_CHIP_EN_PIN,LOW);  
 //  #ifndef NOESP
@@ -1059,35 +1033,32 @@ void SetupESP() {
 //  Serial.setTimeout(NETWORK_YEILDING);  
 //  #endif
   
-
-  
 }
 
 #endif
-
 
 #ifndef NOLED
 
 void Glowbug() {
   #ifndef NO74H
     #ifndef NOPWM
-      
-      if (beatToggle) {
-        analogWrite(LED_1_PIN, 254);
-        analogWrite(LED_2_PIN, 254);
-        analogWrite(LED_3_PIN, 254);
-        analogWrite(LED_4_PIN, 254);
-      } else {
-        analogWrite(LED_1_PIN, 0);
-        analogWrite(LED_2_PIN, 0);
-        analogWrite(LED_3_PIN, 0);
-        analogWrite(LED_4_PIN, 0);  
-      }
-
-      
-      if ((millis()-ledElapse)>(((motor1+motor2+motor3+motor4)/64)*(leveling?8:1)) ) {
-        beatToggle=!beatToggle;
-        ledElapse= millis();
+      if (powered||leveling) {
+        if (beatToggle) {
+          analogWrite(LED_1_PIN, 254);
+          analogWrite(LED_2_PIN, 254);
+          analogWrite(LED_3_PIN, 254);
+          analogWrite(LED_4_PIN, 254);
+        } else {
+          analogWrite(LED_1_PIN, 0);
+          analogWrite(LED_2_PIN, 0);
+          analogWrite(LED_3_PIN, 0);
+          analogWrite(LED_4_PIN, 0);  
+        }
+          
+        if ((millis()-ledElapse)>(((motor1+motor2+motor3+motor4)/64)*(leveling?8:1)) ) {
+          beatToggle=!beatToggle;
+          ledElapse= millis();
+        }
       }
       
     #else
@@ -1102,8 +1073,7 @@ void Glowbug() {
 
      #else
       //nothing
-      //slow blink
-      
+      //slow blink      
        
      #endif
    #endif  
@@ -1117,7 +1087,6 @@ void SetupLED() {
 }
 
 #endif
-
 
 void setup() 
 {
@@ -1149,18 +1118,15 @@ void setup()
   #ifndef NOUSB
    #ifdef NOESP
 //    Serial.begin(UNIFIED_BAUD_RATE);
-//    #else
+   #else
 //    Serial1.begin(UNIFIED_BAUD_RATE);
     #endif
   #endif
 
 }
-
-
   
 void loop() 
 { 
-
 
   #ifndef NOUSB
   Monitor(); //handles input for output serial debugging
@@ -1178,11 +1144,9 @@ void loop()
   Gyroscope1();  //first half of retrieval of gyro info
   #endif
 
-
   #ifndef NOLED
   Glowbug();
-  #endif
-  
+  #endif  
 
   #ifndef NOUSB
   Monitor(); //handles input for output serial debugging
@@ -1199,7 +1163,6 @@ void loop()
   #ifndef NOMPU
   Gyroscope3(); //second half of retrieval of gyro info
   #endif
-
 
   #ifndef NOLED
   Glowbug();
@@ -1221,7 +1184,6 @@ void loop()
   Locator(); //reads the GPS information
   #endif
 
-
   #ifndef NOLED
   Glowbug();
   #endif
@@ -1230,8 +1192,8 @@ void loop()
 
     #ifndef NOPWM
       #ifdef DEBUGPWM
-       // DebugPWM();
-       // Serial.println();
+        DebugPWM();
+        Serial.println();
       #endif
     #endif
     
