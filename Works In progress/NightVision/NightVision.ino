@@ -1,4 +1,4 @@
-byte writes[8] = {6, 7, 8, 9, 10, 11, 12, 13 };
+byte writes[8] = {2, 3, 4, 5, 6, 7, 8, 9};
 byte reader[4] = {A0, A1, A2, A3 };
 
 /*
@@ -13,7 +13,7 @@ byte reader[4] = {A0, A1, A2, A3 };
  *   O @ @ O   6 3 2 3    12 A3 A2 09
  *     O O       5 4         11 10
  */
-byte data[8*16];
+byte data[4*2];
 
 void setup() {
 
@@ -21,7 +21,7 @@ void setup() {
     pinMode(writes[i], OUTPUT);
     digitalWrite(writes[i], LOW);
   }
-  for (int i=0;i<8*16; i++) {
+  for (int i=0;i<4*2; i++) {
     data[i]=0;
   }
   Serial.begin(256000); 
@@ -31,7 +31,7 @@ byte analogByteRead(int pin) {
      return map(analogRead(pin),0,1024,0,255);
 }
 
-void GatherSet(int c, int c2) {
+void GatherSet(int c) {
 
   /* using two readers, in a total of 4 reads 2 each
   that per pair of emitters with the same readers */
@@ -62,56 +62,28 @@ void GatherSet(int c, int c2) {
   * the same pattern per set for east, south,
   * and west emitters but using same readers
   */
-  
+
   digitalWrite(writes[(c*2)+0], HIGH);
-  data[(c*8)+0]=analogByteRead(reader[c]);
-  digitalWrite(writes[(c*2)+1], HIGH);
-  data[(c*8)+1]=analogByteRead(reader[c2]);
-  data[(c*8)+2]=analogByteRead(reader[c]);
+  data[(c*2)+0]=analogByteRead(reader[c]);  
   digitalWrite(writes[(c*2)+0], LOW);
-  data[(c*8)+3]=analogByteRead(reader[c2]);
+  digitalWrite(writes[(c*2)+1], HIGH);
+  data[(c*2)+1]=analogByteRead(reader[c]);
   digitalWrite(writes[(c*2)+1], LOW);
-  
-  digitalWrite(writes[(c*2)+2], HIGH);  
-  data[(c*8)+4]=analogByteRead(reader[c]);
-  digitalWrite(writes[(c*2)+3], HIGH); 
-  data[(c*8)+5]=analogByteRead(reader[c2]);
-  data[(c*8)+6]=analogByteRead(reader[c]);
-  digitalWrite(writes[(c*2)+2], LOW);
-  data[(c*8)+7]=analogByteRead(reader[c2]);
-  digitalWrite(writes[(c*2)+3], LOW);
-  
-  digitalWrite(writes[(c*2)+4], HIGH);  
-  data[(c*8)+8]=analogByteRead(reader[c]);
-  digitalWrite(writes[(c*2)+4], HIGH); 
-  data[(c*8)+9]=analogByteRead(reader[c2]);
-  data[(c*8)+10]=analogByteRead(reader[c]);
-  digitalWrite(writes[(c*2)+4], LOW);
-  data[(c*8)+11]=analogByteRead(reader[c2]);
-  digitalWrite(writes[(c*2)+5], LOW);
-  
-  digitalWrite(writes[(c*2)+6], HIGH);  
-  data[(c*8)+12]=analogByteRead(reader[c]);
-  digitalWrite(writes[(c*2)+7], HIGH); 
-  data[(c*8)+13]=analogByteRead(reader[c2]);
-  data[(c*8)+14]=analogByteRead(reader[c]);
-  digitalWrite(writes[(c*2)+6], LOW);
-  data[(c*8)+15]=analogByteRead(reader[c2]);
-  digitalWrite(writes[(c*2)+7], LOW);
+   
 }
 
 void loop() {
 
-  GatherSet(0,1); //reader one
+  GatherSet(0); //reader one
 
-  GatherSet(1,2); //reader two
+  GatherSet(1); //reader two
 
-  GatherSet(2,3); //reader three
+  GatherSet(2); //reader three
 
-  GatherSet(3,0); //reader four
+  GatherSet(3); //reader four
 
   if (Serial) {
-    Serial.write(data, 8*16);
+    Serial.write(data, 4*2);
   }
   
 }
