@@ -28,7 +28,7 @@
 
 //Comment out NOLED to disable the use of
 //the four analog pins used to light LEDs
-#define NOLED
+//#define NOLED
 
 /************************
  *   Debugging defines  *
@@ -864,7 +864,7 @@ void SerialRead(char ch) {
 
 
 void Driver() {
-    
+
   String txt = Serial.readStringUntil('\n');  
   
   while (txt.length()>0) {
@@ -915,7 +915,7 @@ void Driver() {
         if (txt.length()>4) {
           AxisZ = Convert(txt.substring(1,5));
           AxisZ = map(AxisZ,Z_AXIS_LOW,Z_AXIS_MAX,0,1024);
-          txt.remove(0,5);        
+          txt.remove(0,5);
         }
         break;
         
@@ -968,15 +968,16 @@ void Driver() {
     depressToggle=false;
   }
 
-  if (powered) {
+  if (powered) {    
     motor1= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
     motor2= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
     motor3= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
     motor4= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
     Engines();
+ 
   }  
 
-//  if (leveling) {
+//  if (leveling) {      
 //      int  left = map(AxisX, -1024, 0, MIN_74H_PULSE, MAX_74H_PULSE);
 //      int  right = map(AxisX, 0, 1024, MIN_74H_PULSE, MAX_74H_PULSE);
 //  
@@ -986,8 +987,7 @@ void Driver() {
 //      RatePulseInterval(4,((left+up)/2));
 //      RatePulseInterval(5,((left+down)/2));
 //      RatePulseInterval(6,((right+up)/2));
-//      RatePulseInterval(7,((right+down)/2));    
-//  
+//      RatePulseInterval(7,((right+down)/2));
 //  }  
     
   #ifdef DEBUGESP
