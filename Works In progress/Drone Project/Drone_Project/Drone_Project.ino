@@ -16,11 +16,11 @@
 
 //Comment out no GPS to disable
 //the Neo-GPS location chip                                                                                     
-//#define NOGPS
+#define NOGPS
 
 //Comment ou no MPU to disable the
 //pitch/yaw/tilt motion sensor chip
-//#define NOMPU
+#define NOMPU
 
 //Comment out NOPWM to disable the use of
 //the four capable analogWrite digitals
@@ -28,7 +28,7 @@
 
 //Comment out NOLED to disable the use of
 //the four analog pins used to light LEDs
-//#define NOLED
+#define NOLED
 
 /************************
  *   Debugging defines  *
@@ -490,8 +490,8 @@ void DebugMPU()
 #endif
 #endif
 
-void Gyroscope1() {  /* this function is split into two parts because the
-  elapsed timing is too long and the unit needs to be quickly responsive */
+void Gyroscope1() {  /* this function is split into two parts 1 & 2 because
+  the elapsed timing is too long and the unit needs to be quickly responsive */
   digitalWrite(MPU_INTR_PIN, LOW);
   // === Read acceleromter data === //
   Wire.beginTransmission(0x68);
@@ -500,12 +500,11 @@ void Gyroscope1() {  /* this function is split into two parts because the
   digitalWrite(MPU_INTR_PIN,HIGH);
 }
 
-void Gyroscope2() {  /* this function is split into two parts because the
-  elapsed timing is too long and the unit needs to be quickly responsive */
+void Gyroscope2() {  /* this function is split into two parts 1 & 2 because
+  the elapsed timing is too long and the unit needs to be quickly responsive */
   digitalWrite(MPU_INTR_PIN, LOW);
   Wire.requestFrom(0x68,14, true); // Read 6 registers total, each axis value is stored in 2 registers
   //For a range of +-2g, we need to divide the raw values by 16384, according to the datasheet
-
   rotateX = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset1); // X-axis value
   rotateY = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset2); // Y-axis value
   rotateZ = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset3); // Z-axis value
@@ -513,22 +512,7 @@ void Gyroscope2() {  /* this function is split into two parts because the
   accelX = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset4); // X-axis value
   accelY = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset5); // Y-axis value
   accelZ = (((Wire.read() << 8 | Wire.read()) / (16384.0*2))-offset6); // Z-axis value
-
-
   digitalWrite(MPU_INTR_PIN,HIGH);
-}
-float GyroChange(int set, float val) {
-  set = set * setSize;
-  float avg=0;
-  if (setSize>1) {
-    for (int i = 0; i<(setSize-1); i++) {
-      avg=avg+mpuChange[set+i];
-      mpuChange[set+i]=mpuChange[set+(i+1)];
-    }
-    avg =(avg/setSize);
-    mpuChange[set+(setSize-1)]=val;
-  } else avg=val;
-   return avg;   
 }
 
 void Gyroscope3() { /* used during routine looping in-place of part 2 above */
@@ -546,13 +530,29 @@ void Gyroscope3() { /* used during routine looping in-place of part 2 above */
   accelZ = GyroChange(5, accelZ); 
 }
 
-void Gyroscope4() {
+void Gyroscope4() {  /* included in the part 3 and inititlization this
+  is like setting last-value states, to keep them as new values come */
   mpuChange[0]=rotateX; mpuChange[1]=rotateX; mpuChange[2]=rotateX;
   mpuChange[3]=rotateY; mpuChange[4]=rotateY; mpuChange[5]=rotateY;
   mpuChange[6]=rotateZ; mpuChange[7]=rotateZ; mpuChange[8]=rotateZ;
   mpuChange[9]=accelX; mpuChange[10]=accelX; mpuChange[11]=accelX;
   mpuChange[12]=accelY; mpuChange[13]=accelY; mpuChange[14]=accelY;
   mpuChange[15]=accelZ; mpuChange[16]=accelZ; mpuChange[17]=accelZ;   
+}
+
+float GyroChange(int set, float val) { /* this is an attempt ot bring
+  in data from the last set and current set, smoothing out an average */
+  set = set * setSize;
+  float avg=0;
+  if (setSize>1) {
+    for (int i = 0; i<(setSize-1); i++) {
+      avg=avg+mpuChange[set+i];
+      mpuChange[set+i]=mpuChange[set+(i+1)];
+    }
+    avg =(avg/setSize);
+    mpuChange[set+(setSize-1)]=val;
+  } else avg=val;
+   return avg;   
 }
 
 void SetupMPU() {
@@ -580,13 +580,16 @@ void SetupMPU() {
   digitalWrite(MPU_INTR_PIN,HIGH);
 
   for (int i;i<(setSize*6);i++) {
-    mpuChange[i]=0;
+    mpuChange[i]=0; //initialize to zero
   }
 
-  //get a reading to fill the arrays
+  //get an initial reading to fill the arrays
+  //it is normal operation least the 3rd part
   Gyroscope1();
   Gyroscope2();
   Gyroscope4();
+
+  //in a loop from now on we only use part 1 & 3
 
 }
 #endif
@@ -766,10 +769,10 @@ void EnginesOff() {
 void EnginesOn() {
   powered=true;
   #ifndef NOPWM
-    motor1=PWM_MIN_SPEED;
-    motor2=PWM_MIN_SPEED;
-    motor3=PWM_MIN_SPEED;
-    motor4=PWM_MIN_SPEED;
+    motor1=PWM_MAX_SPEED;
+    motor2=PWM_MAX_SPEED;
+    motor3=PWM_MAX_SPEED;
+    motor4=PWM_MAX_SPEED;
     Engines();
   #endif
 
@@ -962,6 +965,7 @@ void Driver() {
         LevelsOff();
       } else {
         LevelsOn();
+        RatePulseInterval(-1,MAX_74H_PULSE);
       }
     }
   } else {
@@ -969,11 +973,11 @@ void Driver() {
   }
 
   if (powered) {    
-    motor1= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-    motor2= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-    motor3= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-    motor4= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-    Engines();
+//    motor1= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+//    motor2= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+//    motor3= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+//    motor4= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+//    Engines();
  
   }  
 
@@ -1128,6 +1132,20 @@ void setup()
 void loop() 
 { 
 
+  //this loop is broken down into four major portions
+  //which repeat nearly if not for the Gyroscope calls
+  //and the locator, in dividing up these chips use a
+  //lot of processing power/timing, we have split the
+  //gyroscope calls into two calls needed and locator
+  //just one call, in each section below, those take
+  //load bearing so they have all other functionality
+  //repeating around it to ensure smooth response as
+  //fast as we can, the fourth section is just debugs
+  //debugs and USB would not be enabled in operating
+  
+  //####################
+  //Section 1 ##########
+  
   #ifndef NOUSB
   Monitor(); //handles input for output serial debugging
   #endif
@@ -1147,6 +1165,9 @@ void loop()
   #ifndef NOLED
   Glowbug();
   #endif  
+
+  //####################
+  //Section 2 ##########
 
   #ifndef NOUSB
   Monitor(); //handles input for output serial debugging
@@ -1168,6 +1189,9 @@ void loop()
   Glowbug();
   #endif
 
+  //####################
+  //Section 3 ##########  
+
   #ifndef NOUSB
   Monitor(); //handles input for output serial debugging
   #endif
@@ -1187,6 +1211,9 @@ void loop()
   #ifndef NOLED
   Glowbug();
   #endif
+
+  //####################
+  //Section 4 ##########  
 
   #ifndef NOUSB
 

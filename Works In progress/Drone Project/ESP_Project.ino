@@ -3,15 +3,21 @@
 //COM7
 
 #define WIFISTA_SSID           "RADIO"
-#define WIFISTA_KEY            ""
+#define WIFISTA_KEY            "80756FE7AB"
 #define WIFIAP_SSID           "FLYER"
-#define WIFIAP_KEY            ""
+#define WIFIAP_KEY            "2A87B76C3E"
 #define STATIC_IP           {192,168,4,2}      
 #define STATIC_GW           {192,168,0,1}
 #define STATIC_SUBNET       {255,255,255,0}
 #define SERVERIP         "192.168.4.3"
 
 byte mac[] = {
+  //This mac needs to match the
+  //esp module station mac address
+  //as there are two mac per esp.
+  //ESP_DOWNLOAD_TOOL_V2.4 in the
+  //ESP8266 folder will show both of
+  //them when flashing the .bin file.
   0xCE, 0x50, 0xE3, 0xD1, 0x44, 0x12
 };
 
