@@ -1,0 +1,95 @@
+
+## BEGIN CURRENT ##
+
+Software Installed: Arduino 1.8.9
+
+Preferences->Boards URL: https://github.com/esp8266/Arduino/releases/download/2.4.0-rc2/package_esp8266com_index.json,https://dl.espressif.com/dl/package_esp32_index.json
+
+Boards Installed:
+Arduino AVR Boards 1.6.23
+esp32 1.0.5
+ESP8266 2.4.0-rc2
+
+Libraries Installed:
+Bridge 1.7.0
+Esplora 1.0.4
+Ethernet 2.0.0
+Firmata 2.3.8
+GSM 1.0.6
+Keyboard 1.0.2
+LiquidCrystal 1.0.7
+Mouse 1.0.1
+Robot Control 1.0.4
+Robot IR Remote 2.0.0
+Robot Motor 1.0.3
+SD 1.2.3
+Servo 1.1.3
+SpacebrewYun 1.0.1
+Stepper 1.1.3
+Temboo 1.2.1
+TFT 1.0.6
+WiFi 1.2.7
+Adafruit BusIO 1.7.2
+Adafruit Circuit Playground 1.0.1
+Adafruit DS3502 1.0.1
+Adafruit FRAM I2C 1.1.3
+Adafruit GFX Library 1.10.6
+Adafruit MCP23008 library 2.1.0
+Adafruit MCP23017 Arduino Library 1.3.0
+Adafruit MFRC630 RFID 1.1.0
+Adafruit SSD1306 2.4.3
+ESP8266 and ESP32 OLED driver for SD1306 displays 4.2.0
+ESP8266-OLED Display Library 1.0.1
+OLED SSD1306 - SH1106 1.0.0
+SdFat - Adafruit Fork 1.2.3
+serialEEPROM 2.0.1
+SoftWire 2.0.4
+TinyGPS 13.0.0
+TinyGSM 0.10.8
+Tinysuite 1.0.1
+
+
+## END CURRENT ##
+
+
+
+
+
+
+## BEGIN RESEARCH ##
+
+
+http://arduino.esp8266.com/stable/package_esp8266com_index.json,
+https://github.com/esp8266/Arduino/releases/download/2.4.0-rc2/package_esp8266com_index.json,
+https://dl.espressif.com/dl/package_esp32_index.json,
+http://arduino.esp8266.com/versions/2.3.0/package_esp8266com_index.json,
+http://arduino.esp8266.com/versions/2.0.0/package_esp8266com_index.json,
+http://arduino.esp8266.com/versions/1.6.5-947-g39819f0/package_esp8266com_index.json
+
+
+https://arduino.esp8266.com/stable/package_esp8266com_index.json,
+https://github.com/esp8266/Arduino/releases/download/2.4.0-rc2/package_esp8266com_index.json,
+https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+https://dl.espressif.com/dl/package_esp32_index.json,
+http://arduino.esp8266.com/versions/2.3.0/package_esp8266com_index.json,
+http://arduino.esp8266.com/versions/2.0.0/package_esp8266com_index.json,
+http://arduino.esp8266.com/versions/1.6.5-947-g39819f0/package_esp8266com_index.json
+
+
+Arduino 8.1.0
+ESP8266 2.3.0
+ESP32 1.0.3
+
+https://github.com/esp8266/Arduino/releases/download/2.4.0-rc2/package_esp8266com_index.json,
+https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
+
+https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json,
+
+http://arduino.esp8266.com/stable/package_esp8266com_index.json,
+https://dl.espressif.com/dl/package_esp32_index.json
+
+
+Arduino 1.8.13
+ESP8266 2.4.0-rc2
+
+## END RESEARCH ##

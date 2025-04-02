@@ -16,11 +16,11 @@
 
 //Comment out no GPS to disable
 //the Neo-GPS location chip                                                                                     
-#define NOGPS
+//#define NOGPS
 
 //Comment ou no MPU to disable the
 //pitch/yaw/tilt motion sensor chip
-#define NOMPU
+//#define NOMPU
 
 //Comment out NOPWM to disable the use of
 //the four capable analogWrite digitals
@@ -28,7 +28,7 @@
 
 //Comment out NOLED to disable the use of
 //the four analog pins used to light LEDs
-#define NOLED
+//#define NOLED
 
 /************************
  *   Debugging defines  *
@@ -973,11 +973,11 @@ void Driver() {
   }
 
   if (powered) {    
-//    motor1= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-//    motor2= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-//    motor3= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-//    motor4= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
-//    Engines();
+    motor1= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+    motor2= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+    motor3= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+    motor4= map(AxisZ, 1, 1024, PWM_MIN_SPEED, PWM_MAX_SPEED);
+    Engines();
  
   }  
 
