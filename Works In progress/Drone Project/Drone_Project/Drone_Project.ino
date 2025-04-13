@@ -16,7 +16,7 @@
 
 //Comment out no GPS to disable
 //the Neo-GPS location chip                                                                                     
-//#define NOGPS
+#define NOGPS
 
 //Comment ou no MPU to disable the
 //pitch/yaw/tilt motion sensor chip
@@ -86,10 +86,10 @@
 #define PWM_MOTOR3_PIN 6
 #define PWM_MOTOR4_PIN 3
 
-#define PWM_MIN_SPEED 50 //slowest taxi state
-#define PWM_MAX_SPEED 250 //byte maximum
+#define PWM_MIN_SPEED 5 //slowest taxi state
+#define PWM_MAX_SPEED 255 //byte maximum
 
-#define PWM_CHANGE_RATE 50
+#define PWM_CHANGE_RATE 5
 
 //the following values are based on what
 //discrepencies the actual data reports
@@ -194,6 +194,8 @@ bool depressToggle=false;
 bool switchToggle=false;
 
 String RemoveNextArg(String *args, String delim) {
+  //returns and removes the next argument
+  //in args seperated by the next delim(iter)
   String ret=String(*args);
   if (ret.indexOf(delim)>-1) {
       ret.remove(ret.indexOf(delim));
@@ -204,19 +206,22 @@ String RemoveNextArg(String *args, String delim) {
   return ret;
 }
 String NextArg(String text, String delim) {
+  //returns the next arg in text seperated by the next delim(iter)
   return ((text.indexOf(delim)>-1)?text.substring(0,text.indexOf(delim)):text);
 }
 String RemoveArg(String text, String delim) {
+  //returns the args least the next arg in text seperated by the next delim(iter)
   return ((text.indexOf(delim)>-1)?text.substring(text.indexOf(delim)+delim.length()):"");
 }
 
-bool IsALN(char ch) {
+bool IsALN(char ch) { //returns whether ch is alpaha numeric
   switch (ch) {
     case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':case '0':
       return true;break;default:return false;break;
   }
 }
-long Convert(String num) {
+long Convert(String num) { 
+  //convers the visual number in string to a long
   while (num.charAt(0) == '0') num.remove(0,1);
   char ary[num.length()];
   num.toCharArray(ary,num.length());
@@ -224,8 +229,9 @@ long Convert(String num) {
 }
 
 long Convert(int len, char num[]) {
-  long ret=0;
-  long mul=0;
+  //convers the visual number
+  //in a char arracy to a long
+  long ret=0; long mul=0;
   for (long i=0;i<len;i++) {
     mul=1;
     for (long j=0;j<(((len-1)-(i+1))+1);j++) mul=mul*10;
@@ -695,6 +701,7 @@ void Engines() {
       motor4=PWM_MIN_SPEED;
   } else if (motor4<0) motor4=0;
 
+
   analogWrite(PWM_MOTOR1_PIN,motor1);
   analogWrite(PWM_MOTOR2_PIN,motor2);
   analogWrite(PWM_MOTOR3_PIN,motor3);
@@ -746,6 +753,7 @@ void SetupPWM() {
   analogWrite(PWM_MOTOR2_PIN,0);
   analogWrite(PWM_MOTOR3_PIN,0);
   analogWrite(PWM_MOTOR4_PIN,0);
+  
   motor1=0;
   motor2=0;
   motor3=0;
@@ -964,8 +972,7 @@ void Driver() {
       if (leveling) {
         LevelsOff();
       } else {
-        LevelsOn();
-        RatePulseInterval(-1,MAX_74H_PULSE);
+        LevelsOn();        
       }
     }
   } else {
@@ -981,7 +988,10 @@ void Driver() {
  
   }  
 
-//  if (leveling) {      
+  if (leveling) {
+
+    RatePulseInterval(-1,MIN_74H_PULSE);
+    
 //      int  left = map(AxisX, -1024, 0, MIN_74H_PULSE, MAX_74H_PULSE);
 //      int  right = map(AxisX, 0, 1024, MIN_74H_PULSE, MAX_74H_PULSE);
 //  
@@ -992,7 +1002,7 @@ void Driver() {
 //      RatePulseInterval(5,((left+down)/2));
 //      RatePulseInterval(6,((right+up)/2));
 //      RatePulseInterval(7,((right+down)/2));
-//  }  
+  }  
     
   #ifdef DEBUGESP
     #ifndef NOUSB
@@ -1046,7 +1056,7 @@ void SetupESP() {
 void Glowbug() {
   #ifndef NO74H
     #ifndef NOPWM
-      if (powered||leveling) {
+      if (powered) {
         if (beatToggle) {
           analogWrite(LED_1_PIN, 254);
           analogWrite(LED_2_PIN, 254);
@@ -1063,6 +1073,11 @@ void Glowbug() {
           beatToggle=!beatToggle;
           ledElapse= millis();
         }
+      } else {
+        analogWrite(LED_1_PIN, 0);
+        analogWrite(LED_2_PIN, 0);
+        analogWrite(LED_3_PIN, 0);
+        analogWrite(LED_4_PIN, 0);  
       }
       
     #else
