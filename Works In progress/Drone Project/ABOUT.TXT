@@ -3,53 +3,21 @@
                ABOUT:
 #########################################
 
-Initially I called this project YAADD, "Yet Another Arduino Dumb Drone,"  I haven't seen a first so "another" is misleading, but I assume with all those out there, largely drone and Arduino markets may somehow depend on each other.  This is my Drone Project folder that I will update as a work in progress of SketchUp models for 3D printing, wiring diagrams, and software code for both sketches and the ESP8266.
+Initially I called this project YAADD, "Yet Another Arduino Dumb Drone,"  I haven't seen a first so "another" is misleading, but I assume with all those out there, largely drone and Arduino markets may somehow depend on each other.  This is my Drone Project folder that I will update as a work in progress, wiring diagrams, and software code for both the controller and drone sketches as well their compliment ESP-01S sketches.
 
-
-#########################################
-               PRODUCT:
-#########################################
-
-Apart from the files, or software, everything else is purchasable via Amazon.com and Aliexpress.com (for the power boost module, also I found the batteries cheaper at Aliexpress, 10 to 2 same price) where I myself acquire anything referenced in making project. Aside from the one module to boost powewr, the 3D filament, an inexpensive 3D printer, Arduino's, or modules/hardware that interfaces to an Arduino are all purchasable through Amazon.com and quite cheap I believe for end user.  I tried searching for the power boost module at Amazon and no luck in finding it via serch terms Amazon messes up with way too much incorrect suggestive product in term to results, so it might not have it or Amazon is incapable of the option of strict regular expression for my query thoughts.
 
 
 #########################################
-               MY DRONE:
+               CONTENTS:
 #########################################
 
+In the folder you will find a "Depreciated" folder, which will be already failed project experiment media.  You can ignore it or check it out, I mainly am just using it to backup prior attempts just incase I need something returned from them.
 
-I am not making a functional camera, there is only 4 lights as far as anything extra special, however, it has a gyro chip, and GPS so possibly it could do some cool stuff with those in flying stable preset tracks, or follow some phone like your own pet.
+There is an ESP-01S folder, this is everything needed to flash an ESP-01S to the best firmware possible which was a rare find on the internet through massive exhaustive searching and testing the AT commands/manuals, finding various builds from mainly three different large playing companies in the market of and eventually choosing for very good reasons, an obscure downloaded firmware that was difficult to locate, as well, choosing a flashing software of about three of them.  There is a README.TXT in it's folder for more information.
 
-I am going with a separate hand held unit not a phone or computer as the controls, as to make it just a neat toy that hopefully flies comprised of the two pieces, a drone and controller, and it charges batteries by USB to computer. The controller already is a solid small similarity to that of Sega Genesis built up with InstaMorph plastic.  Also I'm making a Visual Basic application that will emulate the controller too.
+The controller and the drone are named radio and flyer.  The FlyerArdunio folder holds the sketch project for the Arduino  of the drone.  The FlyerESP01S folder holds the sketch project for the ESP-01S of the drone, for after a the firmware is applied.  Likewise the RadioArdunio folder holds the sketch project for the Arduino  of the controller.  The RadioESP01S folder holds the sketch project for the ESP-01S of the controller, for after a the firmware is applied.
 
-#########################################
-               PROGRESS:
-#########################################
-
-
-In need of new batteries, and I'm going with two LP 502030, 3.7v 250mAh, as well small JST plugs for a bit different way I'm making the battery cage plug in, instead of wire lengths on the JST to do so, they are getting too worked and failing at the terminals.  So, I'm fixing the plugs to the battery cage as if a cartridge.
-
-Yet so far in early testing, I think the diagram is finished, I've not tested it on the drone itself, but mimmiced it on a white board and I think I have the motor/transistor combo that will give enough power and trim to do the job, with only 9v all be it wall power, it deifnitly displays enough motor speed, so the 12v boost shouldn't have a problem unless over powering, which I doubt for it actually coming off a 3.7v LIPO battery.
-
-The controls are decently handling performance so those ESP8266 source codes I consider finished.  Plugging in the drone, and then plugging in the controller, they sync and the blue light fires rapidly telling me it's receiving the messages, everything is responsive.  For more information on how to get the ESP8266 working well with the Arduino IDE I've created a ESP8266 sub folder.
-
-I also found the code so far to be botched in MPU-5060 programing, I figured it out but haven't updated it because I've had to overhaul the whole engine ways of doing things, and until I get a testable pwoerful enough actual functioning drone, I wont be able to help any of that portion of development yet.
-
-#########################################
-               OUTLOOK:
-#########################################
+Any media in the root folder along with this file, is informational and should be kept up to date the best I can.
 
 
-I am not trying to put too much money into this, otherwise I get discouraged, but the effort in 3D modeling and programming has been thus far my kind of expensive fun, that I may do in versed with SketchUp 3D and a number of computer languages.
 
-To the quest, there are so many thousands of these things it seems you can find around today, cheap to expensive, and I’m just trying to enjoy seeing one get up in flight, I love electronics, you can see my hobby experience by searching for “nforystek” on the EveryCircuit.com.
-
-
-#########################################
-              REFERENCES:
-#########################################
-
-https://www.amazon.com/
-https://www.arduino.cc/
-http://www.esp8266basic.com/
-http://www.aliexpress.com/

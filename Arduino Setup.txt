@@ -1,3 +1,5 @@
+Current configuration below allows me to program the Arduino Uno, Arduino Nano, ESP-01/S and ESP32-CAM
+versus the attempts to do so, trying research configurations and board URLs, even the latest Arduino.
 
 ## BEGIN CURRENT ##
 
@@ -29,6 +31,8 @@ Stepper 1.1.3
 Temboo 1.2.1
 TFT 1.0.6
 WiFi 1.2.7
+
+
 Adafruit BusIO 1.7.2
 Adafruit Circuit Playground 1.0.1
 Adafruit DS3502 1.0.1
@@ -57,6 +61,10 @@ Tinysuite 1.0.1
 
 
 ## BEGIN RESEARCH ##
+
+https://github.com/esp8266/Arduino/releases/download/2.4.0-rc2/package_esp8266com_index.json,
+
+https://dl.espressif.com/dl/package_esp32_index.json,http://arduino.esp8266.com/stable/package_esp8266com_index.json
 
 
 http://arduino.esp8266.com/stable/package_esp8266com_index.json,
