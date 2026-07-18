@@ -1,4 +1,15 @@
-########################################
+#########################################
+                ABOUT:
+#########################################
+
+This drone is up to date with my progress the best I can, before recent, the project only once flipped over by a narrow
+power margin.  Lately, I've got the power so that the drone can take off, over powered actually.  However the code is
+not enough to fly just yet (I think), and my personal project chips are weakened from all the testing, and may need
+replacement to get the power control precise enough.  If that is the case all the chips from the whole project may
+be replaced, and perhaps, changed to brushless to eliminate needing two batteries on the actual drone, not sure yet.
+
+
+#########################################
                CONTENTS:
 #########################################
 
@@ -6,9 +17,8 @@ In the folder you will find a "Depreciated" folder, which will be already failed
 
 There is an ESP-01S folder, this is everything needed to flash an ESP-01S to the best firmware possible which was a rare find on the internet through massive exhaustive searching and testing the AT commands/manuals, finding various builds from mainly three different large playing companies in the market of and eventually choosing for very good reasons, an obscure downloaded firmware that was difficult to locate, as well, choosing a flashing software of about three of them.  There is a README.TXT in it's folder for more information.
 
-The controller and the drone are named radio and flyer.  The FlyerArdunio folder holds the sketch project for the Arduino  of the drone.  The FlyerESP01S folder holds the sketch project for the ESP-01S of the drone, for after a the firmware is applied.  Likewise the RadioArdunio folder holds the sketch project for the Arduino  of the controller.  The RadioESP01S folder holds the sketch project for the ESP-01S of the controller, for after a the firmware is applied.
+The controller and the drone are named radio and flyer.  The "FlyerArdunio" folder holds the sketch project for the Arduino  of the drone.  The "FlyerESP01S" folder holds the sketch project for the ESP-01S of the drone, for after a the firmware is applied.  Likewise the "RadioArdunio" folder holds the sketch project for the Arduino  of the controller.  The "RadioESP01S" folder holds the sketch project for the ESP-01S of the controller, for after a the firmware is applied.
 
-Any media in the root folder along with this file, is informational and should be kept up to date the best I can.
 
 
 
