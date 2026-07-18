@@ -1,13 +1,4 @@
-
-#########################################
-               ABOUT:
-#########################################
-
-Initially I called this project YAADD, "Yet Another Arduino Dumb Drone,"  I haven't seen a first so "another" is misleading, but I assume with all those out there, largely drone and Arduino markets may somehow depend on each other.  This is my Drone Project folder that I will update as a work in progress, wiring diagrams, and software code for both the controller and drone sketches as well their compliment ESP-01S sketches.
-
-
-
-#########################################
+########################################
                CONTENTS:
 #########################################
 
